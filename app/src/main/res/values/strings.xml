@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Jukebox App</string>
+    <string name="my_machines">My Machines</string>
 </resources>
