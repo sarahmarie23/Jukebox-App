@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.jukeboxapp.R
+import com.example.jukeboxapp.ui.components.BluetoothCard
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 @Composable
@@ -39,6 +41,10 @@ fun OpeningScreen(name: String, logo: Painter, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp)
+        )
+        BluetoothCard(
+            //bluetooth = painterResource(id = R.drawable.bluetooth),
+            //modifier = Modifier.offset(y = (-8.dp))
         )
 
         Box(
