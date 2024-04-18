@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Jukebox App</string>
+    <string name="my_machines">My Machines</string>
+    <string name="turn_on_bluetooth">Turn on Bluetooth</string>
+    <string name="connection_message">Bluetooth must be on in order to make a connection</string>
+    <string name="wurlitzer_1015">Wurlitzer 1015</string>
+    <string name="cd_edition">CD Edition</string>
+    <string name="vinyl_edition">Vinyl Edition</string>
+    <string name="change_message">To change between CD and vinyl, flip the switch on the receiver inside your jukebox.</string>
 </resources>
