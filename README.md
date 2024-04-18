@@ -82,3 +82,13 @@ If the user receives a call, the jukebox will stop playing. When the user hangs 
 **Question 1:** How would users prefer to make song selections? I was told to make it like a remote with number buttons. Would customers prefer that (the MVP version) or would they want something more visual like scrolling through a playlist in a music player app (Spotify)?
 
 **Question 2:** How will the users create a playlist? The brute force method would be manually typing in each song name into a list mapped to the button number that corresponds to it in the jukebox. Ideally, they would search for the song name and then some data would be downloaded to create the playlist (album cover, artist, date). I need to get some opinions from others on what they would prefer.
+
+# Mockup for the app
+
+4/17/24
+
+I have included here a page of screens that pertain to the jukebox app (actual name TBD) [Click here to view the screens.](https://raw.githubusercontent.com/sarahmarie23/Jukebox-App/master/AppMockupScreens.jpg)
+
+I also have a flowchart to show the "golden path" of the app, [which you can check out here.](https://raw.githubusercontent.com/sarahmarie23/Jukebox-App/master/SarahMartelAppMockup.jpg)
+
+This design is relevant to the target audience, which is jukebox collectors, because it works with the specified type of jukebox (CD or vinyl) that they own. It also gives them the value of seamless transitions to receiving a phone call while their music is playing, and resuming it afterwards, as requested by customers. It is simple and easy to use.
