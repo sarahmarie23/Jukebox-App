@@ -1,5 +1,4 @@
-package com.example.jukeboxapp.ui.screens
-
+package com.example.jukeboxapp.ui.components
 
 import android.media.Image
 import androidx.compose.foundation.Image
@@ -30,22 +29,18 @@ import com.example.jukeboxapp.ui.components.BluetoothCard
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 @Composable
-fun OpeningScreen(name: String, logo: Painter, modifier: Modifier = Modifier) {
+fun Background(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
 
     ) {
-        Text(text = name,
+        Text(text = stringResource(id = R.string.app_name),
             style = MaterialTheme.typography.displayMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp)
         )
-        //BluetoothCard(
-        //bluetooth = painterResource(id = R.drawable.bluetooth),
-        //modifier = Modifier.offset(y = (-8.dp))
-        //)
 
         Box(
             modifier = Modifier
@@ -57,7 +52,7 @@ fun OpeningScreen(name: String, logo: Painter, modifier: Modifier = Modifier) {
                     .padding(16.dp)
             )
             Image(
-                painter = logo,
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
@@ -74,11 +69,8 @@ fun OpeningScreen(name: String, logo: Painter, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun OpeningScreenPreview() {
+fun BackgroundPreview() {
     JukeboxAppTheme {
-        OpeningScreen(
-            stringResource(R.string.app_name),
-            painterResource(R.drawable.logo)
-        )
+        Background()
     }
 }

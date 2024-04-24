@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.jukeboxapp.ui.screens.MachinePairing
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -41,6 +42,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     JukeboxAppTheme {
-        Greeting("Android")
+        MachinePairing()
     }
 }
