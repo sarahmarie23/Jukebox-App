@@ -3,6 +3,7 @@ package com.example.jukeboxapp.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -33,6 +37,7 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -120,12 +125,34 @@ fun PairedCard() {
             ) {
                 Text(
                     text = stringResource(id = R.string.my_jukebox),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
                 )
                 Text(
                     text = stringResource(id = R.string.cd_edition),
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+
+                ) {
+                    Icon(Icons.Rounded.CheckCircle, contentDescription = null)
+                    Text(
+                        text = stringResource(id = R.string.connected),
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Right,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    )
+                }
 
             }
         }
