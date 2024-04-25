@@ -40,7 +40,7 @@ fun MachinePairing(
     ) {
         AppHeader()
         JukeboxNameCard(
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(6.dp)
         )
         //Spacer(modifier = Modifier.height(24.dp))
         Card(
