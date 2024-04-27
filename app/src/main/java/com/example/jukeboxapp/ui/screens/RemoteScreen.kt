@@ -1,5 +1,7 @@
 package com.example.jukeboxapp.ui.screens
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.widget.EditText
 import android.widget.Toast
@@ -16,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,21 +31,40 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import com.example.jukeboxapp.ui.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 
 
 @Composable
 fun RemoteScreen(
+    viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
     var input by remember { mutableStateOf("") }
+    val isBluetoothEnabled by viewModel.isBluetoothEnabled.collectAsState(false)
     val context = LocalContext.current
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
+        if (!isBluetoothEnabled) {
+            // display error message
+        } else {
+            // do stuff
+            RemoteNumberInput(
+                value = input,
+                onValueChange = { newValue -> input = newValue },
+                onNumberSent = {
+                    viewModel.sendSelection(input)
+                    Toast.makeText(context, "Selection $input sent", Toast.LENGTH_SHORT).show()
+                }
+            )
+            }
+        }/*
         RemoteNumberInput(
             value = input,
             onValueChange = { newValue -> input = newValue },
@@ -51,7 +73,8 @@ fun RemoteScreen(
                 input = ""
             }
         )
-    }
+        */
+
 }
 
 @Composable
@@ -93,6 +116,6 @@ private fun showToastError(context: Context) {
 @Composable
 fun RemoteScreenPreview() {
     JukeboxAppTheme {
-        RemoteScreen()
+        //RemoteScreen()
     }
 }
