@@ -1,3 +1,5 @@
+import com.android.tools.r8.internal.le
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -50,7 +52,7 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.bluetooth:bluetooth:1.0.0-alpha02")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
