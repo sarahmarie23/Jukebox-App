@@ -1,38 +1,24 @@
 package com.example.jukeboxapp.ui.screens
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.widget.EditText
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import com.example.jukeboxapp.ui.JukeboxAppViewModel
+import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 
@@ -42,39 +28,26 @@ fun RemoteScreen(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    var input by remember { mutableStateOf("") }
-    val isBluetoothEnabled by viewModel.isBluetoothEnabled.collectAsState(false)
+    //val isBluetoothEnabled by viewModel.isBluetoothEnabled.mutableStateOf(false)
     val context = LocalContext.current
-
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        if (!isBluetoothEnabled) {
+        //if (!isBluetoothEnabled) {
             // display error message
-        } else {
-            // do stuff
+        //} else {
             RemoteNumberInput(
-                value = input,
-                onValueChange = { newValue -> input = newValue },
+                value = viewModel.lastSongSelection.value,
+                onValueChange = { newSelection -> viewModel.updateLastSongSelection(newSelection) },
                 onNumberSent = {
-                    viewModel.sendSelection(input)
-                    Toast.makeText(context, "Selection $input sent", Toast.LENGTH_SHORT).show()
+                    viewModel.sendSelection(viewModel.lastSongSelection.value)
+                    Toast.makeText(context, "Selection ${viewModel.lastSongSelection.value} sent", Toast.LENGTH_SHORT).show()
                 }
             )
             }
-        }/*
-        RemoteNumberInput(
-            value = input,
-            onValueChange = { newValue -> input = newValue },
-            onNumberSent = {
-                Toast.makeText(context, "Selection $input sent", Toast.LENGTH_SHORT).show()
-                input = ""
-            }
-        )
-        */
-
+        //}
 }
 
 @Composable
@@ -115,7 +88,9 @@ private fun showToastError(context: Context) {
 @Preview(showBackground = true)
 @Composable
 fun RemoteScreenPreview() {
+    val testState = JukeboxAppState(/*true,*/ "00")
+    val testViewModel = JukeboxAppViewModel(testState)
     JukeboxAppTheme {
-        //RemoteScreen()
+        RemoteScreen(testViewModel)
     }
 }

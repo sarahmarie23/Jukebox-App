@@ -6,11 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.jukeboxapp.ui.JukeboxAppViewModel
+import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.screens.MachinePairing
 import com.example.jukeboxapp.ui.screens.RemoteScreen
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    viewModel = JukeboxAppViewModel(this)
+                    val testState = JukeboxAppState(/*true,*/ "00")
+                    val testViewModel = JukeboxAppViewModel(testState)
                     RemoteScreen(viewModel)
                 }
             }
