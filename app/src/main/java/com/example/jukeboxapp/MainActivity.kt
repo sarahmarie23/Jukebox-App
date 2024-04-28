@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.screens.MachinePairing
+import com.example.jukeboxapp.ui.screens.MainPage
 import com.example.jukeboxapp.ui.screens.RemoteScreen
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
@@ -28,7 +29,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val testState = JukeboxAppState(/*true,*/ "00")
                     val testViewModel = JukeboxAppViewModel(testState)
-                    RemoteScreen(viewModel)
+                    //RemoteScreen(testViewModel)
+                    MainPage()
                 }
             }
         }
