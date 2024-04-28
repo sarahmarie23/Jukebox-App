@@ -1,13 +1,17 @@
 package com.example.jukeboxapp.ui.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 
@@ -30,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.ui.components.AppHeader
@@ -48,17 +53,24 @@ fun MainPage(
     var bluetoothAdapter: BluetoothAdapter? by remember { mutableStateOf(null) }
 
     LaunchedEffect(context) {
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = bluetoothManager.adapter
-
-        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+        val bluetoothAdminPermission = Manifest.permission.BLUETOOTH_CONNECT
+        if (ContextCompat.checkSelfPermission(context, bluetoothAdminPermission)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it from the user
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(bluetoothAdminPermission),
+                123
+            )
+        } else {
             try {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 context.startActivity(enableBtIntent)
+            } catch (e: ActivityNotFoundException) {
+                Log.e("MainPage", "Bluetooth enable intent not found: ${e.message}")
             } catch (e: Exception) {
                 Log.e("MainPage", "Failed to start Bluetooth enable intent: ${e.message}")
             }
-
         }
     }
 
@@ -87,9 +99,9 @@ fun MainPage(
 }
 
 @Composable
-fun MakeToast() {
+fun MakeToast(text: String) {
     val context = LocalContext.current
-    Toast.makeText(context, "Bluetooth not connected", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
 
 @Preview(showBackground = true)
