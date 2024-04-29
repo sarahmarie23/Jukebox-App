@@ -98,11 +98,8 @@ fun MainPage(
             ) {
                 MyMachinesCard()
             }
-
-            PairedCard()
-
+            PairedCard(navController)
         }
-
     }
 }
 

@@ -31,7 +31,8 @@ class MainActivity : ComponentActivity() {
                     val testViewModel = JukeboxAppViewModel(testState)
                     //RemoteScreen(testViewModel)
                     val navController = rememberNavController()
-                    MainPage(navController)
+                    //MainPage(navController)
+                    Navigation(navController, testViewModel)
                 }
             }
         }

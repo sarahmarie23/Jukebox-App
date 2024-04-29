@@ -1,8 +1,10 @@
 package com.example.jukeboxapp.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +47,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
+import com.example.jukeboxapp.Screen
+import com.example.jukeboxapp.Screen.*
+import com.example.jukeboxapp.Screen.RemoteScreen.route
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 
@@ -108,11 +115,15 @@ fun JukeboxNameCard(
 
 }
 @Composable
-fun PairedCard() {
+fun PairedCard(navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
+            .clickable {
+                Log.d("Navigation", "Navigating from PairedCard")
+                navController.navigate(route)
+            }
     ){
         Row {
             Image(
@@ -194,7 +205,8 @@ fun PairedCardPreview(
 
 ) {
     JukeboxAppTheme {
+        val navController = rememberNavController()
         AppHeader()
-        PairedCard()
+        PairedCard(navController)
     }
 }
