@@ -71,7 +71,9 @@ fun PairedMachine(
                 Text(stringResource(id = R.string.go_back_button))
             }
             Spacer(modifier = Modifier.width(24.dp))
-            Button(onClick = { navController.navigate("main_page_screen") }) {
+            Button(onClick = { navController.navigate("main_page_screen")
+                viewModel.updateBluetoothState(true)
+            }) {
                 Text(stringResource(id = R.string.continue_button))
             }
 

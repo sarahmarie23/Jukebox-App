@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +51,7 @@ import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -60,6 +62,7 @@ fun MainPage(
     modifier: Modifier = Modifier
 ) {
     val isBluetoothEnabled = viewModel.isBluetoothEnabled
+    var delayNeeded by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     var isDeviceAdded by remember { mutableStateOf(false) }
@@ -109,14 +112,12 @@ fun MainPage(
                 Text(text = "Turn on Bluetooth to pair with a machine")
                 Button(onClick = {
                     navController.navigate("paired_machine_screen")
-                    viewModel.updateBluetoothState(true)
                 }) {
                     Text(stringResource(id = R.string.search))
                 }
             } else {
                 PairedCard(navController, viewModel)
             }
-
         }
     }
 }
