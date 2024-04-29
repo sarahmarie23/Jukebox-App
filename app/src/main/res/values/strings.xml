@@ -11,4 +11,8 @@
     <string name="change_message">To change between CD and vinyl, flip the switch on the receiver inside your jukebox.</string>
     <string name="continue_button">Continue</string>
     <string name="go_back_button">Go back</string>
+    <string name="connected">Connected</string>
+    <string name="not_connected">Not connected</string>
+    <string name="search">Search for machines</string>
+    <string name="jukebox_name">Jukebox name</string>
 </resources>

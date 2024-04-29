@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -20,18 +18,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
+import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.ui.components.AppHeader
-import com.example.jukeboxapp.ui.components.Background
-import com.example.jukeboxapp.ui.components.Background2
 import com.example.jukeboxapp.ui.components.JukeboxNameCard
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 
 @Composable
-fun MachinePairing(
+fun PairedMachine(
+    navController: NavController,
+    viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    //Background2()
+    val isBluetoothEnabled = viewModel.isBluetoothEnabled
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,7 +42,8 @@ fun MachinePairing(
     ) {
         AppHeader()
         JukeboxNameCard(
-            modifier = Modifier.padding(10.dp)
+            viewModel,
+            modifier = Modifier.padding(6.dp)
         )
         //Spacer(modifier = Modifier.height(24.dp))
         Card(
@@ -61,11 +64,16 @@ fun MachinePairing(
 
         ) {
 
-            OutlinedButton(onClick = { /*TODO*/ }) {
+            OutlinedButton(onClick = {
+                navController.navigate("main_page_screen")
+                viewModel.updateBluetoothState(false)
+            }) {
                 Text(stringResource(id = R.string.go_back_button))
             }
             Spacer(modifier = Modifier.width(24.dp))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navController.navigate("main_page_screen")
+                viewModel.updateBluetoothState(true)
+            }) {
                 Text(stringResource(id = R.string.continue_button))
             }
 
@@ -80,6 +88,9 @@ fun MachinePairing(
 @Composable
 fun MachinePairingPreview() {
     JukeboxAppTheme {
-        MachinePairing()
+        val testState = JukeboxAppState(false, "00")
+        val testViewModel = JukeboxAppViewModel(testState)
+        val navController = rememberNavController()
+        PairedMachine(navController, testViewModel)
     }
 }

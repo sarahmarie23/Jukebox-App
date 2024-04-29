@@ -21,7 +21,7 @@ fun AppHeader() {
     ) {
         Text(
             text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.displaySmall,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp)

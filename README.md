@@ -92,3 +92,34 @@ I have included here a page of screens that pertain to the jukebox app (actual n
 I also have a flowchart to show the "golden path" of the app, [which you can check out here.](https://raw.githubusercontent.com/sarahmarie23/Jukebox-App/master/SarahMartelAppMockup.jpg)
 
 This design is relevant to the target audience, which is jukebox collectors, because it works with the specified type of jukebox (CD or vinyl) that they own. It also gives them the value of seamless transitions to receiving a phone call while their music is playing, and resuming it afterwards, as requested by customers. It is simple and easy to use.
+
+# Jukebox App Prototype
+
+4/28/24
+
+While it would be nice to have, it is unnecessary to have a playlist building functionality. I would prefer to get everything solid before attempting a playlist builder.
+
+## What's needed for the MVP
+
+* **Bluetooth functionality** - currently, the app asks for permission from the user to use the necessary permissions. If the Bluetooth is off, it will prompt the user to turn it on. It's hard to test the Bluetooth functionality when I don't have the Arduino working yet.
+
+* **Arduino setup** - The Arduino connects to my PC and I added a basic program to test if its working. You can see the Arduio on the list of Bluetooth devices on the phone, but only twice has it connected to the Arduino. I know this because the output in Arduino IDE displayed it in Serial Monitor.
+
+* **Sending and receiving data** - Currently, if you enter a number on the remote, it *says* it was sent, but nothing actually happens right now. I would like it so that it sends and the Arduino either lights up or an output appears in a terminal.
+
+* **Validating user input** - While not *technically* required, I'd be disappointed in myself if I didn't try to take care of this. Things like making sure valid numbers are entered, limiting the length of the jukebox name so that it doesn't overflow on the container (or maybe accounting for that code).
+
+* **Receiving a call** - I haven't touched this, but the app should allow the user to stop/pause the song if they are receiving a call.
+
+## Features -> Values
+
+* Remote screen to input song numbers -> Intuitive way to control a jukebox from a phone
+
+* Transmits song selection via Bluetooth -> Can control the music being played without being right in front of the jukebox
+
+* The ability to mute the jukebox when a call is incoming -> Better experience taking phone calls, won't have to go over to the jukebox to pause it
+
+## Prototype in Action
+
+https://github.com/sarahmarie23/Jukebox-App/JukeboxAppPrototype.mp4
+

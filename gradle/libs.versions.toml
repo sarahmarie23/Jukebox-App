@@ -1,5 +1,8 @@
 [versions]
-agp = "8.3.1"
+agp = "8.3.2"
+bluetooth = "1.0.0-alpha02"
+bluetoothLe = "2.5.0"
+bluetoothleVersion = "1.0.0-alpha01"
 kotlin = "1.9.0"
 coreKtx = "1.12.0"
 junit = "4.13.2"
@@ -10,7 +13,11 @@ activityCompose = "1.8.2"
 composeBom = "2023.08.00"
 
 [libraries]
+androidx-bluetooth = { module = "androidx.bluetooth:bluetooth", version.ref = "bluetooth" }
+androidx-bluetooth-LE = { module = "androidx.bluetooth:bluetooth-LE", version.ref = "bluetoothLe" }
+androidx-bluetoothle = { module = "androidx.bluetooth:bluetoothle", version.ref = "bluetoothleVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
