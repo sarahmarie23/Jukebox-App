@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.screens.PairedMachine
@@ -29,7 +30,8 @@ class MainActivity : ComponentActivity() {
                     val testState = JukeboxAppState(/*true,*/ "00")
                     val testViewModel = JukeboxAppViewModel(testState)
                     //RemoteScreen(testViewModel)
-                    MainPage()
+                    val navController = rememberNavController()
+                    MainPage(navController)
                 }
             }
         }
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     JukeboxAppTheme {
-        PairedMachine()
+        val navController = rememberNavController()
+        PairedMachine(navController)
     }
 }
