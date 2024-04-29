@@ -121,5 +121,5 @@ While it would be nice to have, it is unnecessary to have a playlist building fu
 
 ## Prototype in Action
 
-https://github.com/sarahmarie23/Jukebox-App/JukeboxAppPrototype.mp4
+https://github.com/sarahmarie23/Jukebox-App/blob/master/JukeboxAppPrototype.mp4
 
