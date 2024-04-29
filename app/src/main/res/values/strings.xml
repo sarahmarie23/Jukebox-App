@@ -13,4 +13,6 @@
     <string name="go_back_button">Go back</string>
     <string name="connected">Connected</string>
     <string name="not_connected">Not connected</string>
+    <string name="search">Search for machines</string>
+    <string name="jukebox_name">Jukebox name</string>
 </resources>

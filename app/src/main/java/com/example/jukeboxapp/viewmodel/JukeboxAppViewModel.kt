@@ -9,20 +9,23 @@ import com.example.jukeboxapp.model.JukeboxAppState
 class JukeboxAppViewModel(initialState: JukeboxAppState) : ViewModel() {
     //private val bluetoothManager = com.example.jukeboxapp.ui.BluetoothManager(context)
 
-    //val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
+    val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
+    val jukeboxName = mutableStateOf("My Jukebox")
     val lastSongSelection = mutableStateOf(initialState.lastSongSelection)
 
-    fun updateLastSongSelection(selection: String) {
-        lastSongSelection.value = selection
+    fun updateBluetoothState(isEnabled: Boolean) {
+        isBluetoothEnabled.value = isEnabled
+    }
+
+    fun updateJukeboxName(newName: String) {
+        jukeboxName.value = newName
     }
 
     fun sendSelection(selection: String) {
         // TODO send selection via bluetooth
     }
-/*
-    fun updateBluetoothState(isEnabled: Boolean) {
-        isBluetoothEnabled.value = isEnabled
-    }
 
- */
+    fun updateLastSongSelection(selection: String) {
+        lastSongSelection.value = selection
+    }
 }

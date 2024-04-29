@@ -33,6 +33,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.AbsoluteAlignment
@@ -53,8 +54,9 @@ import com.example.jukeboxapp.R
 import com.example.jukeboxapp.Screen
 import com.example.jukeboxapp.Screen.*
 import com.example.jukeboxapp.Screen.RemoteScreen.route
+import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
-
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,8 +81,11 @@ fun TopAppBar(
 
 @Composable
 fun JukeboxNameCard(
+    viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
+    val jukeboxName = remember { mutableStateOf("My Jukebox") }
+
     Surface(
         modifier = Modifier.width(300.dp),
         shape = RoundedCornerShape(10.dp),
@@ -105,17 +110,19 @@ fun JukeboxNameCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
-                value = stringResource(id = R.string.my_jukebox),
-                onValueChange = { /**/ },
-                label = { Text(stringResource(id = R.string.type_to_rename)) },
-                //placeholder = { Text(stringResource(id = R.string.my_jukebox))}
+                value = viewModel.jukeboxName.value,
+                onValueChange = { viewModel.updateJukeboxName(it) },
+                label = { Text(stringResource(id = R.string.jukebox_name)) },
             )
         }
     }
 
 }
 @Composable
-fun PairedCard(navController: NavController) {
+fun PairedCard(
+    navController: NavController,
+    viewModel: JukeboxAppViewModel
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,7 +141,7 @@ fun PairedCard(navController: NavController) {
                 horizontalAlignment = AbsoluteAlignment.Right
             ) {
                 Text(
-                    text = stringResource(id = R.string.my_jukebox),
+                    text = viewModel.jukeboxName.value,
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Right,
                     modifier = Modifier
@@ -206,7 +213,9 @@ fun PairedCardPreview(
 ) {
     JukeboxAppTheme {
         val navController = rememberNavController()
+        val state = JukeboxAppState(false, "00")
+        val viewModel = JukeboxAppViewModel(state)
         AppHeader()
-        PairedCard(navController)
+        PairedCard(navController, viewModel)
     }
 }

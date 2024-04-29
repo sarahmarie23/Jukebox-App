@@ -27,11 +27,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val testState = JukeboxAppState(/*true,*/ "00")
+                    val testState = JukeboxAppState(false, "00")
                     val testViewModel = JukeboxAppViewModel(testState)
-                    //RemoteScreen(testViewModel)
                     val navController = rememberNavController()
-                    //MainPage(navController)
+
                     Navigation(navController, testViewModel)
                 }
             }
@@ -44,7 +43,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     JukeboxAppTheme {
+        val testState = JukeboxAppState(false, "00")
+        val testViewModel = JukeboxAppViewModel(testState)
         val navController = rememberNavController()
-        PairedMachine(navController)
+        PairedMachine(navController, testViewModel)
     }
 }

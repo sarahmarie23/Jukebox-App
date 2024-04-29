@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,24 +37,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.jukeboxapp.R
+import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.ui.components.AppHeader
 import com.example.jukeboxapp.ui.components.MyMachinesCard
 import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainPage(
     navController: NavController,
+    viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
+    val isBluetoothEnabled = viewModel.isBluetoothEnabled
     val context = LocalContext.current
 
     var isDeviceAdded by remember { mutableStateOf(false) }
@@ -98,7 +104,19 @@ fun MainPage(
             ) {
                 MyMachinesCard()
             }
-            PairedCard(navController)
+
+            if (!isBluetoothEnabled.value) {
+                Text(text = "Turn on Bluetooth to pair with a machine")
+                Button(onClick = {
+                    navController.navigate("paired_machine_screen")
+                    viewModel.updateBluetoothState(true)
+                }) {
+                    Text(stringResource(id = R.string.search))
+                }
+            } else {
+                PairedCard(navController, viewModel)
+            }
+
         }
     }
 }
@@ -114,6 +132,8 @@ fun MakeToast(text: String) {
 fun MainPagePreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        MainPage(navController)
+        val testState = JukeboxAppState(false, "00")
+        val testViewModel = JukeboxAppViewModel(testState)
+        MainPage(navController, testViewModel)
     }
 }
