@@ -12,9 +12,9 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,6 +36,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.fragment.NavHostFragment
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.ui.components.AppHeader
 import com.example.jukeboxapp.ui.components.MyMachinesCard
@@ -47,9 +51,12 @@ import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainPage(
+    navController: NavController,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+
+    var isDeviceAdded by remember { mutableStateOf(false) }
     var bluetoothAdapter: BluetoothAdapter? by remember { mutableStateOf(null) }
 
     LaunchedEffect(context) {
@@ -66,6 +73,7 @@ fun MainPage(
             try {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 context.startActivity(enableBtIntent)
+                bluetoothAdapter?.startDiscovery()
             } catch (e: ActivityNotFoundException) {
                 Log.e("MainPage", "Bluetooth enable intent not found: ${e.message}")
             } catch (e: Exception) {
@@ -108,7 +116,7 @@ fun MakeToast(text: String) {
 @Composable
 fun MainPagePreview() {
     JukeboxAppTheme {
-        MainPage()
-
+        val navController = rememberNavController()
+        MainPage(navController)
     }
 }

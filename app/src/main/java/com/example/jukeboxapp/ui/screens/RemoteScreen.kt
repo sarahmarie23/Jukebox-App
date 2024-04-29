@@ -9,14 +9,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.model.JukeboxAppState
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
@@ -24,7 +24,8 @@ import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 
 @Composable
-fun RemoteScreen(
+fun Remote(
+    navController: NavController,
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -90,7 +91,8 @@ private fun showToastError(context: Context) {
 fun RemoteScreenPreview() {
     val testState = JukeboxAppState(/*true,*/ "00")
     val testViewModel = JukeboxAppViewModel(testState)
+    val navController = rememberNavController()
     JukeboxAppTheme {
-        RemoteScreen(testViewModel)
+        Remote(navController, testViewModel)
     }
 }

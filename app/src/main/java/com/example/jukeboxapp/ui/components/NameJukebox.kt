@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
-//var text by rememberSaveable { mutableStateOf("") }
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.3.1"
+agp = "8.3.2"
 bluetooth = "1.0.0-alpha02"
 bluetoothLe = "2.5.0"
 bluetoothleVersion = "1.0.0-alpha01"
