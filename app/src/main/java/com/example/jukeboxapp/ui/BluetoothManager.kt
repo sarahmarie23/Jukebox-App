@@ -11,13 +11,19 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.lifecycle.ViewModel
+import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import java.util.UUID
 
 
 
-class BluetoothManager(context: Context) {
-    private val bluetoothAdapter: BluetoothAdapter? =
+class BluetoothManager(
+    viewModel: JukeboxAppViewModel,
+    private val context: Context
+) {
+    private val bluetoothAdapter: BluetoothAdapter? by lazy {
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+    }
 
     private var gatt: BluetoothGatt? = null
 
@@ -25,25 +31,31 @@ class BluetoothManager(context: Context) {
     private val SWITCH_CHARACTERISTIC_UUID = UUID.fromString("SWITCH")
 
     fun connectToDevice(device: BluetoothDevice) {
-        //gatt?.disconnect()
-        //gatt = device.connectGatt(context, false, gattCallback)
+        try {
+            gatt?.disconnect()
+            gatt = device.connectGatt(context, false, gattCallback)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                //gatt.discoverServices()
+                try {
+                    gatt.discoverServices()
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 
             }
         }
     }
-/*
-    fun checkBluetoothState() {
+
+    fun checkBluetoothState(viewModel: JukeboxAppViewModel) {
         val isEnabled = bluetoothAdapter?.isEnabled ?: false
         viewModel.updateBluetoothState(isEnabled)
     }
-
- */
 }

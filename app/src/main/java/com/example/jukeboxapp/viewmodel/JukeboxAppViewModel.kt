@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.ui.BluetoothManager
 
 
-class JukeboxAppViewModel(initialState: JukeboxAppState) : ViewModel() {
-    //private val bluetoothManager = com.example.jukeboxapp.ui.BluetoothManager(context)
+class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : ViewModel() {
+    private val bluetoothManager = BluetoothManager(this, context)
 
     val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
     val jukeboxName = mutableStateOf("My Jukebox")
