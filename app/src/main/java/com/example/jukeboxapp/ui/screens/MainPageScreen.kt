@@ -4,7 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
+
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.ui.BluetoothManager
 import com.example.jukeboxapp.ui.components.AppHeader
 import com.example.jukeboxapp.ui.components.MyMachinesCard
 import com.example.jukeboxapp.ui.components.PairedCard
@@ -59,6 +60,7 @@ import kotlinx.coroutines.delay
 fun MainPage(
     navController: NavController,
     viewModel: JukeboxAppViewModel,
+    bluetoothManager: BluetoothManager,
     modifier: Modifier = Modifier
 ) {
     val isBluetoothEnabled = viewModel.isBluetoothEnabled
@@ -69,26 +71,7 @@ fun MainPage(
     var bluetoothAdapter: BluetoothAdapter? by remember { mutableStateOf(null) }
 
     LaunchedEffect(context) {
-        val bluetoothAdminPermission = Manifest.permission.BLUETOOTH_CONNECT
-        if (ContextCompat.checkSelfPermission(context, bluetoothAdminPermission)
-            != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted, request it from the user
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(bluetoothAdminPermission),
-                123
-            )
-        } else {
-            try {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                context.startActivity(enableBtIntent)
-                bluetoothAdapter?.startDiscovery()
-            } catch (e: ActivityNotFoundException) {
-                Log.e("MainPage", "Bluetooth enable intent not found: ${e.message}")
-            } catch (e: Exception) {
-                Log.e("MainPage", "Failed to start Bluetooth enable intent: ${e.message}")
-            }
-        }
+        bluetoothManager.checkBluetoothState(viewModel)
     }
 
     Scaffold(
@@ -133,8 +116,10 @@ fun MakeToast(text: String) {
 fun MainPagePreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val testState = JukeboxAppState(false, "00")
-        val testViewModel = JukeboxAppViewModel(testState)
-        MainPage(navController, testViewModel)
+        val state = JukeboxAppState(false, "00")
+        val context = LocalContext.current
+        val viewModel = JukeboxAppViewModel(state, context)
+        val bluetoothManager = BluetoothManager(viewModel, context)
+        MainPage(navController, viewModel, bluetoothManager)
     }
 }

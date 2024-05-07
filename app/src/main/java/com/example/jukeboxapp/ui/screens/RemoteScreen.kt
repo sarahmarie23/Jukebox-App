@@ -89,9 +89,10 @@ private fun showToastError(context: Context) {
 @Preview(showBackground = true)
 @Composable
 fun RemoteScreenPreview() {
-    val testState = JukeboxAppState(false, "00")
-    val testViewModel = JukeboxAppViewModel(testState)
     val navController = rememberNavController()
+    val state = JukeboxAppState(false, "00")
+    val context = LocalContext.current
+    val testViewModel = JukeboxAppViewModel(state, context)
     JukeboxAppTheme {
         Remote(navController, testViewModel)
     }

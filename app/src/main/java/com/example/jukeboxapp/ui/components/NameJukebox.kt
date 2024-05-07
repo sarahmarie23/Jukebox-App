@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -214,7 +215,8 @@ fun PairedCardPreview(
     JukeboxAppTheme {
         val navController = rememberNavController()
         val state = JukeboxAppState(false, "00")
-        val viewModel = JukeboxAppViewModel(state)
+        val context = LocalContext.current
+        val viewModel = JukeboxAppViewModel(state, context)
         AppHeader()
         PairedCard(navController, viewModel)
     }
