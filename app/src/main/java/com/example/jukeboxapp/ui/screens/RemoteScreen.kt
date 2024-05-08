@@ -40,10 +40,11 @@ fun Remote(
             // display error message
         //} else {
             RemoteNumberInput(
+                viewModel = viewModel,
                 value = viewModel.lastSongSelection.value,
                 onValueChange = { newSelection -> viewModel.updateLastSongSelection(newSelection) },
                 onNumberSent = {
-                    viewModel.sendSelection(viewModel.lastSongSelection.value)
+                    viewModel.sendSelectionToReceiver(viewModel.lastSongSelection.value)
                     Toast.makeText(context, "Selection ${viewModel.lastSongSelection.value} sent", Toast.LENGTH_SHORT).show()
                 }
             )
@@ -51,12 +52,16 @@ fun Remote(
         //}
 }
 
+
+
 @Composable
 fun RemoteNumberInput(
+    viewModel: JukeboxAppViewModel,
     value: String,
     onValueChange: (String) -> Unit,
     onNumberSent: () -> Unit
 ) {
+
     TextField(
         value = value,
         onValueChange = onValueChange,

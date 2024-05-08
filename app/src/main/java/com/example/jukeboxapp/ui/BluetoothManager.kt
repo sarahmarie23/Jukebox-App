@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.ActivityNotFoundException
@@ -19,7 +20,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import java.util.UUID
@@ -84,21 +84,38 @@ class BluetoothManager(
             // Services discovered successfully
             // Proceed with your communication logic
             val service = gatt.getService(ANDROID_SERVICE_UUID)
-            val characteristic = service?.getCharacteristic()
+            val characteristic = service?.getCharacteristic(CHARACTERISTIC_UUID)
 
             characteristic?.let {
                 gatt.readCharacteristic(it)
-                val data = byteArrayOf(0x01, 0x02) // Example data
-                it.value = data
-                gatt.writeCharacteristic(it)
             }
         } else {
             // Failed to discover services
             // Handle the error if needed
             Log.e("BluetoothManager", "Failed to discover services. Status: $status")
         }
-    } */
+    }
 
+    private val characteristicReadCallback = object : BluetoothGattCharacteristicCallback() {
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            super.onCharacteristicRead(gatt, characteristic, status)
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                val data = characteristic.value
+                if (data.isNotEmpty()) {
+                    val deviceName = String(data, Charsets.UTF_8)
+                    // Update UI with the device name
+                    viewModel.update(deviceName)
+                }
+            } else {
+                Log.e("BluetoothManager", "Failed to read characteristic. Status: $status")
+            }
+        }
+    }
+*/
     fun checkBluetoothState(viewModel: JukeboxAppViewModel) {
         val isEnabled = bluetoothAdapter?.isEnabled ?: false
         viewModel.updateBluetoothState(isEnabled)
@@ -128,27 +145,24 @@ class BluetoothManager(
     fun sendSelection(selection: String) {
         checkBluetoothState()
         if (isBluetoothEnabled.value) {
-            bluetoothAdapter?.let { bluetoothAdapter ->
-                connectedDevice?.let { connectedDevice ->
+            bluetoothAdapter?.let { //bluetoothAdapter ->
+                connectedDevice?.let { //connectedDevice ->
                     val bytes = selection.toByteArray(Charsets.UTF_8)
                     val characteristic = bluetoothManager.gatt?.getService(ANDROID_SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_UUID)
                     characteristic?.let {
-                        it.value = bytes
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.BLUETOOTH
                             ) != PackageManager.PERMISSION_GRANTED
                         ) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
                             return
                         }
-                        gatt?.writeCharacteristic(it)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            gatt?.writeCharacteristic(it, bytes, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
+                        } else {
+                            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                            gatt?.writeCharacteristic(it)
+                        }
                     }
                 }
             }

@@ -16,6 +16,7 @@ class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : Vie
 
     val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
     val jukeboxName = mutableStateOf("My Jukebox")
+    //val jukeboxType =
     val lastSongSelection = mutableStateOf(initialState.lastSongSelection)
 
     fun updateBluetoothState(isEnabled: Boolean) {
@@ -26,11 +27,12 @@ class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : Vie
         jukeboxName.value = newName
     }
 
-
-
     fun updateLastSongSelection(selection: String) {
         lastSongSelection.value = selection
+        sendSelectionToReceiver(selection)
     }
 
-
+    fun sendSelectionToReceiver(selection: String) {
+        bluetoothManager.sendSelection(selection)
+    }
 }
