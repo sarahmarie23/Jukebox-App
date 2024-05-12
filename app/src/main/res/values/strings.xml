@@ -15,5 +15,8 @@
     <string name="not_connected">Not connected</string>
     <string name="search">Search for machines</string>
     <string name="jukebox_name">Jukebox name</string>
-    <string name="uuid">FD2DE127-D3EA-4385-A2BC-CEE9EFB1531D</string>
+    <string name="service_uuid">FD2DE127-D3EA-4385-A2BC-CEE9EFB1531D</string>
+    <string name="characteristic_uuid">25CDD283-218B-44E2-927A-4EC194351E4F</string>
+    <string name="not_available">N/A</string>
+    <string name="jukebox_receiver">Jukebox Receiver</string>
 </resources>

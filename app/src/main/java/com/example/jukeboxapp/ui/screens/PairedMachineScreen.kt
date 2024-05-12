@@ -90,7 +90,7 @@ fun PairedMachine(
 fun MachinePairingPreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxAppState(false, "00")
+        val state = JukeboxAppState(false, "00", "My Jukebox", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         PairedMachine(navController, viewModel)

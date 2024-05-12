@@ -21,7 +21,7 @@ import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 
 @Composable
 fun Navigation(navController: NavHostController, viewModel: JukeboxAppViewModel, bluetoothManager: BluetoothManager) {
-    val state = JukeboxAppState(false, "00")
+    val state = JukeboxAppState(false, "00", "My Jukebox", false)
     val context = LocalContext.current
 
     NavHost(navController, startDestination = Screen.MainPageScreen.route) {
