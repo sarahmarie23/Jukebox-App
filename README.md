@@ -123,4 +123,17 @@ While it would be nice to have, it is unnecessary to have a playlist building fu
 
 https://github.com/sarahmarie23/Jukebox-App/assets/57870970/9aecc6c8-0fe2-4a7d-a5a0-21ff5dd9de91
 
+# Checkpoint 3 - Basic Functionality
+
+5/12/24
+
+**Updates** - I don't really have anything I am updating or changing from the original design, but I am prioritizing the remaining pieces in this order. 
+
+**1. Get Bluetooth communication properly working** - I have spent a lot of time debugging and making the app and Arduino inch closer together to communicating without issues, but haven't quite got there yet. First, I need the Arduino to send over some data (referring to the Jukebox type), and then the song data will be able to be sent from the phone. I have the code written out for sending the data, but they have to connect before I can even test it out.
+
+**2. Work on the remote screen** - I want the UI to be different for vinyl vs CD machines. Vinyl machines have 100 song choices, while CD machines have up to 100 CDs and the track limit would just be however many tracks that CD has. So there should be 1 or 2 text boxes depending on the machine type.
+
+**3. Listen for phone calls** - One of the values of the app was that you could pause the music if you had an incoming phone call. I would like to make that happen. To simulate pausing, it would send over a value in the same way that the song selections are sent over.
+
+**4. Validating user input** - If a user enters a number outside of the range, it should show an error and prompt them to enter the correct value.
 
