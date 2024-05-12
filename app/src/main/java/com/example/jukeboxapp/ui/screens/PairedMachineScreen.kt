@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -88,9 +89,10 @@ fun PairedMachine(
 @Composable
 fun MachinePairingPreview() {
     JukeboxAppTheme {
-        val testState = JukeboxAppState(false, "00")
-        val testViewModel = JukeboxAppViewModel(testState)
         val navController = rememberNavController()
-        PairedMachine(navController, testViewModel)
+        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val context = LocalContext.current
+        val viewModel = JukeboxAppViewModel(state, context)
+        PairedMachine(navController, viewModel)
     }
 }

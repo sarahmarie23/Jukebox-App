@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.datastore.core.android)
     val nav_version = "2.7.7"
     implementation(libs.androidx.bluetooth)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -73,4 +74,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("androidx.datastore:datastore-preferences:1.1.0")
 }

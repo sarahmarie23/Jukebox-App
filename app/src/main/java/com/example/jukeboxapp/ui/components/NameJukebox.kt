@@ -32,9 +32,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -42,12 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
@@ -78,14 +82,13 @@ fun TopAppBar(
         }
     )
 }
-
+// This is on the PairedMachineScreen where you can change the name and confirm the machine
 @Composable
 fun JukeboxNameCard(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    val jukeboxName = remember { mutableStateOf("My Jukebox") }
-
+    var nameInput by remember { mutableStateOf(viewModel.jukeboxName.value) }
     Surface(
         modifier = Modifier.width(300.dp),
         shape = RoundedCornerShape(10.dp),
@@ -103,15 +106,18 @@ fun JukeboxNameCard(
                     .padding(12.dp)
                     .border(BorderStroke(2.dp, Color.Black))
             )
-
             Text(
-                text = stringResource(id = R.string.cd_edition),
+                text = viewModel.jukeboxType.value ?: stringResource(R.string.not_available),
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
-                value = viewModel.jukeboxName.value,
-                onValueChange = { viewModel.updateJukeboxName(it) },
+                value = nameInput,
+                onValueChange = { nameInput = it },
                 label = { Text(stringResource(id = R.string.jukebox_name)) },
             )
         }
@@ -148,21 +154,15 @@ fun PairedCard(
                         .fillMaxWidth()
                         .padding(10.dp)
                 )
-                Text(
-                    text = stringResource(id = R.string.cd_edition),
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                )
+                //viewModel.jukeboxType.value?.let {
+                //}
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
 
                 ) {
                     Icon(Icons.Rounded.CheckCircle, contentDescription = null)
                     Text(
-                        text = stringResource(id = R.string.connected),
+                        text = viewModel.connectionStatus.value,
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Right,
                         modifier = Modifier
@@ -170,7 +170,14 @@ fun PairedCard(
                             .padding(10.dp)
                     )
                 }
-
+                Text(
+                    text = viewModel.jukeboxType.value ?: stringResource(R.string.not_available),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
             }
         }
     }
@@ -213,8 +220,9 @@ fun PairedCardPreview(
 ) {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxAppState(false, "00")
-        val viewModel = JukeboxAppViewModel(state)
+        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val context = LocalContext.current
+        val viewModel = JukeboxAppViewModel(state, context)
         AppHeader()
         PairedCard(navController, viewModel)
     }

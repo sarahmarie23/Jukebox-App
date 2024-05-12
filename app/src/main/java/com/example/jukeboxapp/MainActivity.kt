@@ -8,16 +8,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.ui.BluetoothManager
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.screens.PairedMachine
 import com.example.jukeboxapp.ui.screens.MainPage
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var navController: NavHostController
     private lateinit var viewModel: JukeboxAppViewModel
+    private lateinit var bluetoothManager: BluetoothManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -27,11 +33,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val testState = JukeboxAppState(false, "00")
-                    val testViewModel = JukeboxAppViewModel(testState)
-                    val navController = rememberNavController()
+                    navController = rememberNavController()
+                    val state = JukeboxAppState(false, "00", "My Jukebox", false)
+                    val context = LocalContext.current
+                    viewModel = JukeboxAppViewModel(state, context)
+                    bluetoothManager = BluetoothManager(viewModel, context)
 
-                    Navigation(navController, testViewModel)
+                    Navigation(navController, viewModel, bluetoothManager)
                 }
             }
         }
@@ -43,9 +51,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     JukeboxAppTheme {
-        val testState = JukeboxAppState(false, "00")
-        val testViewModel = JukeboxAppViewModel(testState)
         val navController = rememberNavController()
-        PairedMachine(navController, testViewModel)
+        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val context = LocalContext.current
+        val viewModel = JukeboxAppViewModel(state, context)
+        PairedMachine(navController, viewModel)
     }
 }
