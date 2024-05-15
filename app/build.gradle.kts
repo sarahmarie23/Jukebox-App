@@ -3,6 +3,7 @@ import com.android.tools.r8.internal.le
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0-RC3"
 }
 
 android {
@@ -11,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.jukeboxapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -53,6 +54,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.compose.preview.renderer)
+    implementation(libs.kotlinx.serialization.json)
     val nav_version = "2.7.7"
     implementation(libs.androidx.bluetooth)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -74,5 +77,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("androidx.datastore:datastore-preferences:1.1.0")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }

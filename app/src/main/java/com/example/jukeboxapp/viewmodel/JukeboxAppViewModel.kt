@@ -6,61 +6,61 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jukeboxapp.data.JukeboxDataStore
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.BluetoothManager
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 
 
-class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : ViewModel() {
+
+class JukeboxAppViewModel(initialState: JukeboxState, context: Context) : ViewModel() {
     private val bluetoothManager = BluetoothManager(this, context)
-    private val dataStore: DataStore<Preferences> by context.preferencesDataStore(name = "jukebox_preferences")
-    private val jukeboxDataStore = JukeboxDataStore(dataStore)
+    private val dataStore = JukeboxDataStore(context)
+
+    val currentJukeboxState = viewModelScope.launch {
+        dataStore.readJukeboxState()
+    }
+
+    val jukeboxState: Flow<JukeboxState> = dataStore.storedJukeboxName.map { savedName ->
+        initialState.copy(machineName = savedName ?: "My Jukebox")
+    }
+
 
     val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
     var connectionStatus: MutableState<String> = mutableStateOf("Disconnected")
-    val jukeboxName = mutableStateOf("My Jukebox")
-    private val _jukeboxType = MutableLiveData<String>()
-    val jukeboxType: LiveData<String>
-        get() = _jukeboxType
+    val jukeboxName: Flow<String> = dataStore.storedJukeboxName.map { it ?: "My Jukebox" }
+    val jukeboxType: Flow<String?> = _jukeboxType.asFlow()
 
     val lastSongSelection: MutableState<String> = mutableStateOf( initialState.lastSongSelection)
 
+
     init {
-        viewModelScope.launch {
-            dataStore.storedJukeboxName.collect { savedName : String? ->
-                jukeboxName.value = savedName?: "My Jukebox" // Load saved name on ViewModel initialization
-            }
+        jukeboxState.collect { savedName ->
+            jukeboxName.value = savedName ?: "My Jukebox"
         }
     }
-
-    val jukeboxUiState = combine(
-        jukeboxDataStore.storedJukeboxName
-    ) { storedJukeboxName ->
-        JukeboxUiState(
-            jukeboxName = storedJukeboxName ?: "My Jukebox"
-        )
-    }.distinctUntilChanged()
 
     fun updateBluetoothState(isEnabled: Boolean) {
         isBluetoothEnabled.value = isEnabled
     }
 
     fun updateConnectionStatus(isConnected: Boolean) {
-        connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
+        connectionStatus.value = when (isConnected) {
+            true -> "Connected"
+            false -> "Disconnected"
+        }
     }
 
     fun updateJukeboxName(newName: String) {
-        viewModelScope.launch { // Use viewModelScope for asynchronous operations
-            jukeboxDataStore.saveJukeboxName(newName) // Save the name to DataStore
-            jukeboxName.value = newName // Update the UI state
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[JUKEBOX_NAME_KEY] = newName
+            }
+            jukeboxName.value = newName
         }
     }
 
@@ -77,6 +77,3 @@ class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : Vie
         bluetoothManager.sendSelection(selection)
     }
 }
-data class JukeboxUiState(
-    val jukeboxName: String = "My Jukebox"
-)

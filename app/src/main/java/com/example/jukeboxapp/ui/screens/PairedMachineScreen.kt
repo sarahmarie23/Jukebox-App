@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.components.AppHeader
 import com.example.jukeboxapp.ui.components.JukeboxNameCard
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
@@ -74,6 +74,7 @@ fun PairedMachine(
             Spacer(modifier = Modifier.width(24.dp))
             Button(onClick = { navController.navigate("main_page_screen")
                 viewModel.updateBluetoothState(true)
+                //viewModel.updateJukeboxName(nameInput) TODO to save name
             }) {
                 Text(stringResource(id = R.string.continue_button))
             }
@@ -90,7 +91,7 @@ fun PairedMachine(
 fun MachinePairingPreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         PairedMachine(navController, viewModel)

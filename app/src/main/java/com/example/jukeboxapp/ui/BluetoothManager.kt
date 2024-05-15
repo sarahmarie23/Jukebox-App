@@ -211,7 +211,7 @@ class BluetoothManager(
             status: Int) {
             Log.e("BluetoothManager", "gattCallback - onCharacteristicRead - Status: $status")
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                val data = characteristic.value;
+                val data = characteristic.value
                 if (data.isNotEmpty()) {
                     Log.e("BluetoothManager", "data not empty")
                     val deviceType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"//String(data, Charsets.UTF_8);

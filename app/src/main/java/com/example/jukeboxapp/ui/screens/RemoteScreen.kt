@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
@@ -95,7 +95,7 @@ private fun showToastError(context: Context) {
 @Composable
 fun RemoteScreenPreview() {
     val navController = rememberNavController()
-    val state = JukeboxAppState(false, "00")
+    val state = JukeboxState(false, "00", "My Jukebox", false)
     val context = LocalContext.current
     val testViewModel = JukeboxAppViewModel(state, context)
     JukeboxAppTheme {

@@ -30,18 +30,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.BluetoothManager
 import com.example.jukeboxapp.ui.components.MyMachinesCard
 import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
-import java.util.UUID
 
 object BluetoothConstants {
     val DEVICE_NAME = R.string.jukebox_receiver.toString()
@@ -159,7 +157,7 @@ fun MakeToast(text: String) {
 fun MainPagePreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         val bluetoothManager = BluetoothManager(viewModel, context)

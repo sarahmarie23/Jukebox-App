@@ -10,14 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.BluetoothManager
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.screens.PairedMachine
-import com.example.jukeboxapp.ui.screens.MainPage
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +32,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     navController = rememberNavController()
-                    val state = JukeboxAppState(false, "00", "My Jukebox", false)
+                    val state = JukeboxState(false, "00", "My Jukebox", false)
                     val context = LocalContext.current
                     viewModel = JukeboxAppViewModel(state, context)
                     bluetoothManager = BluetoothManager(viewModel, context)
@@ -52,7 +50,7 @@ class MainActivity : ComponentActivity() {
 fun GreetingPreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxAppState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         PairedMachine(navController, viewModel)
