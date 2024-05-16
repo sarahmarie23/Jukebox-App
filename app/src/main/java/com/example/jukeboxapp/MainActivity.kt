@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     navController = rememberNavController()
-                    val state = JukeboxState(false, "00", "My Jukebox", false)
+                    val state = JukeboxState(false, "00", "My Jukebox", "CD Machine")
                     val context = LocalContext.current
                     viewModel = JukeboxAppViewModel(state, context)
                     bluetoothManager = BluetoothManager(viewModel, context)
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
 fun GreetingPreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", "CD Machine")
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         PairedMachine(navController, viewModel)

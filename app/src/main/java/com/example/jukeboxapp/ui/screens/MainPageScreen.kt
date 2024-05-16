@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
+import kotlinx.coroutines.flow.map
 
 object BluetoothConstants {
     val DEVICE_NAME = R.string.jukebox_receiver.toString()
@@ -53,7 +55,8 @@ fun MainPage(
     bluetoothManager: BluetoothManager,
     modifier: Modifier = Modifier
 ) {
-    val isBluetoothEnabled = viewModel.isBluetoothEnabled
+    val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
+    val isConnectedToMachine by viewModel.jukeboxStateFlow.map { it.isConnectedToMachine }.collectAsState(initial = false)
     var delayNeeded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var deviceName by remember { mutableStateOf("") }
@@ -98,7 +101,7 @@ fun MainPage(
                 MyMachinesCard()
             }
 
-            if (!isBluetoothEnabled.value) {
+            if (!isBluetoothConnected) {
                 Text(text = "Turn on Bluetooth to pair with a machine")
                 Button(onClick = {
                     deviceName = "Jukebox Receiver"
@@ -157,7 +160,7 @@ fun MakeToast(text: String) {
 fun MainPagePreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", "CD Machine", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         val bluetoothManager = BluetoothManager(viewModel, context)

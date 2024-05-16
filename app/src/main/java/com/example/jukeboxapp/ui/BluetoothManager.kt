@@ -26,7 +26,6 @@ import com.example.jukeboxapp.R
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import java.util.UUID
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
 
 
 class BluetoothManager(
@@ -155,7 +154,7 @@ class BluetoothManager(
 
     fun updateConnectionStatus(isConnected: Boolean) {
         _connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
-        handleConnectionStateChange(isConnected)
+        //handleConnectionStateChange(isConnected)
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -215,7 +214,7 @@ class BluetoothManager(
                 if (data.isNotEmpty()) {
                     Log.e("BluetoothManager", "data not empty")
                     val deviceType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"//String(data, Charsets.UTF_8);
-                    viewModel.updateJukeboxType(deviceType)
+                    viewModel.updateMachineType(deviceType)
                 }
             } else {
                 Log.e("BluetoothManager", "Failed to read characteristic. Status: $status")
@@ -224,10 +223,12 @@ class BluetoothManager(
     }
 
 
-
+/*
     fun handleConnectionStateChange(isConnected: Boolean) {
         viewModel.updateConnectionStatus(isConnected)
     }
+
+ */
 
     fun checkBluetoothState(viewModel: JukeboxAppViewModel) {
         val isEnabled = bluetoothAdapter?.isEnabled ?: false

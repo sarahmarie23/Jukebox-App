@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import com.example.jukeboxapp.Screen.RemoteScreen.route
 import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
+import kotlinx.coroutines.flow.map
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +76,8 @@ fun JukeboxNameCard(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    var nameInput by remember { mutableStateOf(viewModel.jukeboxName.value) }
+    var nameInput by remember { mutableStateOf(viewModel.jukeboxStateFlow.value.machineName) }
+    val machineTypeText by viewModel.jukeboxStateFlow.map { it.machineType }.collectAsState(initial = "")
     Surface(
         modifier = Modifier.width(300.dp),
         shape = RoundedCornerShape(10.dp),
@@ -92,14 +95,17 @@ fun JukeboxNameCard(
                     .padding(12.dp)
                     .border(BorderStroke(2.dp, Color.Black))
             )
+
+
             Text(
-                text = viewModel.jukeboxType.value ?: stringResource(R.string.not_available),
+                text = machineTypeText,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
             )
+
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
                 value = nameInput,
@@ -108,13 +114,16 @@ fun JukeboxNameCard(
             )
         }
     }
-
 }
+
 @Composable
 fun PairedCard(
     navController: NavController,
     viewModel: JukeboxAppViewModel
 ) {
+    val jukeboxName by remember { mutableStateOf(viewModel.jukeboxStateFlow.value.machineName) }
+    val isConnectedToMachine by viewModel.jukeboxStateFlow.map { it.isConnectedToMachine }.collectAsState(initial = false)
+    val machineType by viewModel.jukeboxStateFlow.map { it.machineType }.collectAsState(initial = "N/A")
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,7 +142,7 @@ fun PairedCard(
                 horizontalAlignment = AbsoluteAlignment.Right
             ) {
                 Text(
-                    text = viewModel.jukeboxName.value,
+                    text = jukeboxName,
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Right,
                     modifier = Modifier
@@ -148,7 +157,7 @@ fun PairedCard(
                 ) {
                     Icon(Icons.Rounded.CheckCircle, contentDescription = null)
                     Text(
-                        text = viewModel.connectionStatus.value,
+                        text = if (isConnectedToMachine) "Connected" else "Disconnected",
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Right,
                         modifier = Modifier
@@ -157,7 +166,7 @@ fun PairedCard(
                     )
                 }
                 Text(
-                    text = viewModel.jukeboxType.value ?: stringResource(R.string.not_available),
+                    text = machineType,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Right,
                     modifier = Modifier
@@ -206,7 +215,7 @@ fun PairedCardPreview(
 ) {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", "CD Machine")
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         AppHeader()

@@ -9,6 +9,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,7 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
-
+import kotlinx.coroutines.flow.map
 
 
 @Composable
@@ -29,23 +31,24 @@ fun Remote(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    //val isBluetoothEnabled by viewModel.isBluetoothEnabled.mutableStateOf(false)
+    val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
+    val lastSongSelection by viewModel.jukeboxStateFlow.map { it.lastSongSelection }.collectAsState(initial = "00")
     val context = LocalContext.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        //if (!isBluetoothEnabled) {
+        //if (!isBluetoothConnected) {
             // display error message
         //} else {
             RemoteNumberInput(
                 viewModel = viewModel,
-                value = viewModel.lastSongSelection.value,
+                value = lastSongSelection,
                 onValueChange = { newSelection -> viewModel.updateLastSongSelection(newSelection) },
                 onNumberSent = {
-                    viewModel.sendSelectionToReceiver(viewModel.lastSongSelection.value)
-                    Toast.makeText(context, "Selection ${viewModel.lastSongSelection.value} sent", Toast.LENGTH_SHORT).show()
+                    viewModel.sendSelectionToReceiver(lastSongSelection)
+                    Toast.makeText(context, "Selection $lastSongSelection sent", Toast.LENGTH_SHORT).show()
                 }
             )
             }
@@ -95,7 +98,7 @@ private fun showToastError(context: Context) {
 @Composable
 fun RemoteScreenPreview() {
     val navController = rememberNavController()
-    val state = JukeboxState(false, "00", "My Jukebox", false)
+    val state = JukeboxState(false, "00", "My Jukebox", "CD Machine",false)
     val context = LocalContext.current
     val testViewModel = JukeboxAppViewModel(state, context)
     JukeboxAppTheme {

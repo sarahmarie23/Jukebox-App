@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +29,7 @@ import com.example.jukeboxapp.ui.components.AppHeader
 import com.example.jukeboxapp.ui.components.JukeboxNameCard
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun PairedMachine(
@@ -34,7 +37,7 @@ fun PairedMachine(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    val isBluetoothEnabled = viewModel.isBluetoothEnabled
+    val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -91,7 +94,7 @@ fun PairedMachine(
 fun MachinePairingPreview() {
     JukeboxAppTheme {
         val navController = rememberNavController()
-        val state = JukeboxState(false, "00", "My Jukebox", false)
+        val state = JukeboxState(false, "00", "My Jukebox", "CD Machine", false)
         val context = LocalContext.current
         val viewModel = JukeboxAppViewModel(state, context)
         PairedMachine(navController, viewModel)
