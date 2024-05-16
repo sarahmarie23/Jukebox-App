@@ -2,6 +2,7 @@ package com.example.jukeboxapp.ui.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
@@ -41,7 +42,9 @@ import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
 import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 object BluetoothConstants {
     val DEVICE_NAME = R.string.jukebox_receiver.toString()
@@ -67,21 +70,50 @@ fun MainPage(
     var bluetoothAdapter: BluetoothAdapter? by remember { mutableStateOf(null) }
     var discoveredDevices by remember { mutableStateOf<List<BluetoothDevice>>(emptyList()) }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            Log.d("MainPageScreen", "BLUETOOTH_SCAN permission granted")
-            bluetoothManager.discoverDevices(REQUEST_CODE_BLUETOOTH_SCAN)
+    val bluetoothEnableLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Log.d("MainPageScreen", "Bluetooth enabled by user")
+            // Now you can proceed with Bluetooth operations
         } else {
-            Log.d("MainPageScreen", "BLUETOOTH_SCAN permission denied")
+            Log.d("MainPageScreen", "Bluetooth enabling denied by user")
+            // Handle Bluetooth not being enabled by user
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.BLUETOOTH_CONNECT] == true &&
+            permissions[Manifest.permission.BLUETOOTH_SCAN] == true
+        ) {
+            Log.d("MainPageScreen", "All Bluetooth permissions granted")
+            bluetoothManager.discoverDevices(123)
+        } else {
+            Log.d("MainPageScreen", "Bluetooth permissions denied")
             // Handle permission denial (e.g., show a message)
         }
     }
 
     LaunchedEffect(context) {
-        bluetoothManager.checkBluetoothState(viewModel)
-        bluetoothManager.connectToDevice(BluetoothConstants.DEVICE_NAME)
+        // Request Bluetooth permissions
+        withContext(Dispatchers.Main) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+                )
+            )
+        }
+
+
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+            // Check Bluetooth state and connect to device
+            bluetoothManager.checkBluetoothState(bluetoothEnableLauncher, permissionLauncher, viewModel)
+            bluetoothManager.connectToDevice(BluetoothConstants.DEVICE_NAME)
+        }
     }
 
     Scaffold(
@@ -103,22 +135,10 @@ fun MainPage(
 
             if (!isBluetoothConnected) {
                 Text(text = "Turn on Bluetooth to pair with a machine")
-                Button(onClick = {
-                    deviceName = "Jukebox Receiver"
-                    navController.navigate("paired_machine_screen") // TODO make this work
-                    if (bluetoothManager.arePermissionsGranted()) {
-                        bluetoothManager.connectToDevice(deviceName)
-                    } else {
-                        // Request permissions
-                        bluetoothManager.requestPermissions()
-                    }
-                }) {
-                    Text(stringResource(id = R.string.search))
-                }
             } else {
                 Button(onClick = {
                     Log.d("MainPageScreen", "Search for Devices button clicked")
-                    launcher.launch(Manifest.permission.BLUETOOTH_SCAN)
+                    permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN))
                 }) {
                     Text("Search for Devices")
                 }
@@ -129,7 +149,9 @@ fun MainPage(
                 }
 
                 discoveredDevices.forEach { device ->
-                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(context, Manifest
+                        .permission.BLUETOOTH_CONNECT) == PackageManager
+                            .PERMISSION_GRANTED) {
                         Text(
                             text = device.name ?: "Unknown Device",
                             modifier = Modifier.clickable {
