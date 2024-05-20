@@ -74,7 +74,10 @@ fun RemoteNumberInput(
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
-            onDone = { onNumberSent() }
+            onDone = {
+                onNumberSent()
+                viewModel.sendSelectionToReceiver(value)
+            }
         ),
         modifier = Modifier.fillMaxWidth()
     )

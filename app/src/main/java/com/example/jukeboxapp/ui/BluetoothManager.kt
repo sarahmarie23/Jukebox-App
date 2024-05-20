@@ -100,19 +100,11 @@ class BluetoothManager(
                             // for ActivityCompat#requestPermissions for more details.
                             return
                         }
-                        Log.d(
-                            "BluetoothManager",
-                            "Discovered Device - Address: ${device.address}, Name: ${device.name ?: "Name not available"}"
-                        )
+
                         // Check if permissions are granted before accessing device name
                         if (arePermissionsGranted()) {
                             deviceName = device.name ?: "Name not available"
                         }
-
-                        Log.d(
-                            "BluetoothManager",
-                            "Device found - Address: $deviceAddress, Name: $deviceName"
-                        )
 
                         // Check if the MAC address matches your Arduino's MAC address
                         if (deviceAddress == context.getString(R.string.ARDUINO_MAC_ADDRESS)) {
@@ -265,12 +257,13 @@ class BluetoothManager(
         }
 
         // Access to bonded devices is allowed, proceed with device discovery
-        val device = bluetoothAdapter.bondedDevices.find { it.name == deviceName }
-        if (device != null) {
-            Log.d("BluetoothManager", "Found device: ${device.name}")
+        //val device = bluetoothAdapter.bondedDevices.find { it.name == deviceName }
+        connectedDevice = bluetoothAdapter.bondedDevices.find { it.name == "Jukebox Receiver" || it.name == "Arduino"}
+        if (connectedDevice != null) {
+            Log.d("BluetoothManager", "Found device: ${connectedDevice!!.name}")
             try {
                 // Establish a new GATT connection with the device
-                gatt = device.connectGatt(context, false, gattCallback)
+                gatt = connectedDevice!!.connectGatt(context, false, gattCallback)
                 Log.d("BluetoothManager", "connectGatt Result: ${gatt != null}")
             } catch (e: SecurityException) {
                 e.printStackTrace()
@@ -282,7 +275,12 @@ class BluetoothManager(
     }
 
     fun sendSelection(selection: String) {
+        Log.d("BluetoothManager", "About to send selection: $selection")
+        Log.d("BluetoothManager", "Bluetooth Enabled: ${isBluetoothEnabled.value}")
+        Log.d("BluetoothManager", "Gatt: ${gatt != null}")
+
         checkBluetoothState()
+
         if (isBluetoothEnabled.value && gatt != null) {
             val characteristic =
                 gatt?.getService(JUKEBOX_SERVICE_UUID)?.getCharacteristic(SONG_NUMBER_UUID)
@@ -308,6 +306,8 @@ class BluetoothManager(
                     gatt?.writeCharacteristic(it)
                 }
             }
+        } else {
+            Log.e("BluetoothManager", "Didn't send I think")
         }
     }
 
@@ -339,7 +339,7 @@ class BluetoothManager(
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            Log.e("BluetoothManager", "onServicesDiscovered - Status: $status ")
+            Log.d("BluetoothManager", "onServicesDiscovered - Status: $status ")
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 val service = gatt.getService(JUKEBOX_SERVICE_UUID)
                 val characteristic = service?.getCharacteristic(MACHINE_TYPE_UUID)
