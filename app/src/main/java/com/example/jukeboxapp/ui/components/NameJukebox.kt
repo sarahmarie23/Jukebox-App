@@ -96,7 +96,6 @@ fun JukeboxNameCard(
                     .border(BorderStroke(2.dp, Color.Black))
             )
 
-
             Text(
                 text = machineTypeText,
                 style = MaterialTheme.typography.titleMedium,

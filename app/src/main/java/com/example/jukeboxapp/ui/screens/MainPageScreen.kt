@@ -107,8 +107,6 @@ fun MainPage(
             )
         }
 
-
-
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
             // Check Bluetooth state and connect to device
             bluetoothManager.checkBluetoothState(bluetoothEnableLauncher, permissionLauncher, viewModel)
@@ -135,19 +133,21 @@ fun MainPage(
 
             if (!isBluetoothConnected) {
                 Text(text = "Turn on Bluetooth to pair with a machine")
-            } else {
-                Button(onClick = {
-                    Log.d("MainPageScreen", "Search for Devices button clicked")
-                    permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN))
-                }) {
-                    Text("Search for Devices")
-                }
-                Button(onClick = {
-                    bluetoothManager.pairWithDiscoveredDevice(REQUEST_CODE_BLUETOOTH_ADMIN)
-                }) {
-                    Text("Pair with Device")
-                }
-
+            }
+            Button(onClick = {
+                Log.d("MainPageScreen", "Search for Devices button clicked")
+                permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH_SCAN))
+            }) {
+                Text("Search for Devices")
+            }
+            Button(onClick = {
+                Log.d("MainPageScreen", "Pair with Device button clicked")
+                bluetoothManager.pairWithDiscoveredDevice(REQUEST_CODE_BLUETOOTH_ADMIN)
+                navController.navigate("paired_machine_screen")
+            }) {
+                Text("Pair with Device")
+            }
+                /*
                 discoveredDevices.forEach { device ->
                     if (ContextCompat.checkSelfPermission(context, Manifest
                         .permission.BLUETOOTH_CONNECT) == PackageManager
@@ -165,8 +165,10 @@ fun MainPage(
                         Text("Missing Bluetooth Connect permission")
                     }
                 }
+
+                 */
                 PairedCard(navController, viewModel)
-            }
+
         }
     }
 }

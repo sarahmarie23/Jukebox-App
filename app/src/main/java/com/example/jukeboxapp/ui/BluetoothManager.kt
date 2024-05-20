@@ -17,16 +17,21 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.jukeboxapp.R
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import java.util.UUID
 import androidx.compose.runtime.State
+import com.example.jukeboxapp.R
+import com.example.jukeboxapp.R.string.jukebox_service_uuid
+import com.example.jukeboxapp.R.string.machine_type_uuid
+import com.example.jukeboxapp.R.string.song_number_uuid
 
 
 class BluetoothManager(
@@ -41,15 +46,23 @@ class BluetoothManager(
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
     }
 
+    private val JUKEBOX_SERVICE_UUID = UUID.fromString(context.getString(jukebox_service_uuid))
+    private val MACHINE_TYPE_UUID = UUID.fromString(context.getString(machine_type_uuid))
+    private val SONG_NUMBER_UUID = UUID.fromString(context.getString(song_number_uuid))
+
+    // Constants for permissions
+    private val BLUETOOTH_PERMISSION = Manifest.permission.BLUETOOTH
+    private val BLUETOOTH_ADMIN_PERMISSION = Manifest.permission.BLUETOOTH_ADMIN
+    private val BLUETOOTH_CONNECT_PERMISSION = Manifest.permission.BLUETOOTH_CONNECT
+    private val BLUETOOTH_SCAN_PERMISSION = Manifest.permission.BLUETOOTH_SCAN
+
     private val _connectionStatus = mutableStateOf("Disconnected")
     val connectionStatus: State<String> = _connectionStatus
     private var gatt: BluetoothGatt? = null
     private var connectedDevice: BluetoothDevice? = null
 
     private val isBluetoothEnabled: MutableState<Boolean> = mutableStateOf(false)
-    private val appContext = context.applicationContext
-    private val ANDROID_SERVICE_UUID = UUID.fromString(appContext.getString(R.string.service_uuid))
-    private val CHARACTERISTIC_UUID = UUID.fromString(appContext.getString(R.string.characteristic_uuid))
+
     private val PERMISSION_REQUEST_CODE = 123
 
     private var discoveredDevice: BluetoothDevice? = null
@@ -59,20 +72,50 @@ class BluetoothManager(
             val action: String? = intent.action
             when (action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device: BluetoothDevice? =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            intent.getParcelableExtra(
+                                BluetoothDevice.EXTRA_DEVICE,
+                                BluetoothDevice::class.java
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        }
 
                     if (device != null) {
                         val deviceAddress = device.address // Get the MAC address
                         var deviceName = "Name not available"
-                        Log.d("BluetoothManager", "Discovered Device - Address: ${device.address}, Name: ${device.name ?: "Name not available"}")
-                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.BLUETOOTH_CONNECT
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            // TODO: Consider calling
+                            //    ActivityCompat#requestPermissions
+                            // here to request the missing permissions, and then overriding
+                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                            //                                          int[] grantResults)
+                            // to handle the case where the user grants the permission. See the documentation
+                            // for ActivityCompat#requestPermissions for more details.
+                            return
+                        }
+                        Log.d(
+                            "BluetoothManager",
+                            "Discovered Device - Address: ${device.address}, Name: ${device.name ?: "Name not available"}"
+                        )
+                        // Check if permissions are granted before accessing device name
+                        if (arePermissionsGranted()) {
                             deviceName = device.name ?: "Name not available"
                         }
 
-                        Log.d("BluetoothManager", "Device found - Address: $deviceAddress, Name: $deviceName")
+                        Log.d(
+                            "BluetoothManager",
+                            "Device found - Address: $deviceAddress, Name: $deviceName"
+                        )
 
                         // Check if the MAC address matches your Arduino's MAC address
-                        if (deviceAddress == "F4:12:FA:9C:95:85") {
+                        if (deviceAddress == context.getString(R.string.ARDUINO_MAC_ADDRESS)) {
                             discoveredDevice = device
                         }
                     }
@@ -81,24 +124,43 @@ class BluetoothManager(
         }
     }
 
-    private val bondStateChangeReceiver = object : BroadcastReceiver() {
+    private val bondStateChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
             if (action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                val previousBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1)
-                val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+                // Check Bluetooth permissions before accessing device information
+                if (arePermissionsGranted()) {
+                    val device: BluetoothDevice? =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            intent.getParcelableExtra(
+                                BluetoothDevice.EXTRA_DEVICE,
+                                BluetoothDevice::class.java
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        }
 
-                var deviceName = "Unknown"
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    deviceName = device?.name ?: "Unknown"
+                    val previousBondState =
+                        intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1)
+                    val bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+
+                    // Proceed with device information processing
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        Log.d(
+                            "BluetoothManager",
+                            "Bond State Change - Device: ${device?.name ?: "Unknown"}, Previous: $previousBondState, Current: $bondState"
+                        )
+                    }
+
+                } else {
+                    // Handle case where Bluetooth permissions are not granted
+                    Log.e("BluetoothManager", "Bluetooth permissions not granted")
                 }
-
-                Log.d("BluetoothManager", "Bond State Change - Device: ${device?.name ?: "Unknown"}, Previous: $previousBondState, Current: $bondState")
             }
         }
     }
@@ -111,10 +173,79 @@ class BluetoothManager(
         context.registerReceiver(bondStateChangeReceiver, bondStateChangeFilter)
     }
 
+    fun checkBluetoothState(
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        permissionLauncher: ActivityResultLauncher<Array<String>>,
+        viewModel: JukeboxAppViewModel
+    ) {
+
+        val isEnabled = bluetoothAdapter?.isEnabled ?: false
+        Log.d("BluetoothManager", "Bluetooth Enabled: $isEnabled")
+        viewModel.updateBluetoothState(isEnabled)
+
+        if (!isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            activityResultLauncher.launch(enableBtIntent)
+        }
+
+        // Request Bluetooth connect permission if not granted
+        if (!arePermissionsGranted()) {
+            requestPermissions(permissionLauncher)
+        }
+        Log.d("BluetoothManager", "Bluetooth Enabled: $isEnabled")
+        viewModel.updateBluetoothState(isEnabled)
+    }
+
+    fun discoverDevices(requestCode: Int) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            //handlePermissionResult(requestCode)
+            return // Don't proceed with discovery if permission is not granted
+        }
+        Log.d("BluetoothManager", "Starting Bluetooth discovery")
+        discoveredDevice = null
+        if (bluetoothAdapter?.isDiscovering == true) {
+            bluetoothAdapter?.cancelDiscovery()
+        }
+        bluetoothAdapter?.startDiscovery()
+    }
+
+    fun pairWithDiscoveredDevice(requestCode: Int) {
+        if (discoveredDevice != null) {
+            Log.d("BluetoothManager", "Device was discovered! ${discoveredDevice!!.name}")
+            // Request BLUETOOTH_ADMIN permission if not granted
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    context as Activity,
+                    arrayOf(Manifest.permission.BLUETOOTH_ADMIN),
+                    requestCode
+                )
+                return
+            }
+
+            pairDevice(discoveredDevice!!)
+            bluetoothAdapter?.cancelDiscovery() // Stop discovery after pairing
+
+            // Add a delay to give the pairing process time to complete
+            Handler(Looper.getMainLooper()).postDelayed({
+                connectToDevice(discoveredDevice!!.address) // Use the MAC address instead of the device name
+            }, 5000)
+        } else {
+            // Handle case where no device was found (e.g., show a message)
+            Log.d("BluetoothManager", "No device discovered")
+        }
+    }
+
     // Connect to a remote bluetooth device or get info about it
     fun connectToDevice(deviceName: String) {
         // Get the Bluetooth adapter
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
 
         if (bluetoothAdapter == null) {
@@ -129,7 +260,7 @@ class BluetoothManager(
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // Permission not granted, request it
-            requestPermissions()
+            //requestPermissions()
             return
         }
 
@@ -150,14 +281,42 @@ class BluetoothManager(
         }
     }
 
-    fun updateConnectionStatus(isConnected: Boolean) {
-        _connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
-        //handleConnectionStateChange(isConnected)
+    fun sendSelection(selection: String) {
+        checkBluetoothState()
+        if (isBluetoothEnabled.value && gatt != null) {
+            val characteristic =
+                gatt?.getService(JUKEBOX_SERVICE_UUID)?.getCharacteristic(SONG_NUMBER_UUID)
+            characteristic?.let {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return
+                }
+                val bytes = selection.toByteArray(Charsets.UTF_8)
+                it.value = bytes
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    gatt?.writeCharacteristic(
+                        it,
+                        bytes,
+                        BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                    )
+                } else {
+                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    gatt?.writeCharacteristic(it)
+                }
+            }
+        }
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            Log.d("BluetoothManager", "onConnectionStateChange - Status: $status, New State: $newState")
+            Log.d(
+                "BluetoothManager",
+                "onConnectionStateChange - Status: $status, New State: $newState"
+            )
             super.onConnectionStateChange(gatt, status, newState)
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
@@ -170,6 +329,7 @@ class BluetoothManager(
                         Log.d("gattCallBack", "security exception")
                     }
                 }
+
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     Log.d("gattCallBack", "state_disconnected")
                     connectedDevice = null // Reset connected device
@@ -181,18 +341,20 @@ class BluetoothManager(
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             Log.e("BluetoothManager", "onServicesDiscovered - Status: $status ")
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                val service = gatt.getService(ANDROID_SERVICE_UUID)
-                val characteristic = service?.getCharacteristic(CHARACTERISTIC_UUID)
+                val service = gatt.getService(JUKEBOX_SERVICE_UUID)
+                val characteristic = service?.getCharacteristic(MACHINE_TYPE_UUID)
                 characteristic?.let {
                     if (ActivityCompat.checkSelfPermission(
                             context,
                             Manifest.permission.BLUETOOTH_CONNECT
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
-                        ActivityCompat.requestPermissions(
-                            context as Activity,
-                            arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 124
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            ActivityCompat.requestPermissions(
+                                context as Activity,
+                                arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 124
+                            )
+                        }
                         return
                     }
                     gatt.readCharacteristic(it)
@@ -205,15 +367,13 @@ class BluetoothManager(
         override fun onCharacteristicRead(
             gatt: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic,
-            status: Int) {
-            Log.e("BluetoothManager", "gattCallback - onCharacteristicRead - Status: $status")
+            status: Int
+        ) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 val data = characteristic.value
-                if (data.isNotEmpty()) {
-                    Log.e("BluetoothManager", "data not empty")
-                    val deviceType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"//String(data, Charsets.UTF_8);
-                    viewModel.updateMachineType(deviceType)
-                }
+                val machineType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"
+                Log.d("BluetoothManager", "Machine Type: $machineType")
+                viewModel.updateMachineType(machineType)
             } else {
                 Log.e("BluetoothManager", "Failed to read characteristic. Status: $status")
             }
@@ -221,98 +381,40 @@ class BluetoothManager(
     }
 
 
-/*
+    fun onDestroy() {
+        // Unregister the receivers to prevent memory leaks
+        context.unregisterReceiver(receiver)
+        context.unregisterReceiver(bondStateChangeReceiver)
+        // Close the BluetoothGatt connection if it's open
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        gatt?.close()
+        gatt = null
+    }
+
+    fun updateConnectionStatus(isConnected: Boolean) {
+        _connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
+        //handleConnectionStateChange(isConnected)
+    }
+
+        /*
     fun handleConnectionStateChange(isConnected: Boolean) {
         viewModel.updateConnectionStatus(isConnected)
     }
 
  */
-
-    fun checkBluetoothState(
-        activityResultLauncher: ActivityResultLauncher<Intent>,
-        permissionLauncher: ActivityResultLauncher<Array<String>>,
-        viewModel: JukeboxAppViewModel) {
-        /*
-        val isEnabled = bluetoothAdapter?.isEnabled ?: false
-        Log.d("BluetoothManager", "Bluetooth Enabled: $isEnabled")
-        viewModel.updateBluetoothState(isEnabled)
-
-        if (!isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            (context as Activity).startActivityForResult(enableBtIntent, 123)
-        }
-
-        // Request Bluetooth connect permission if not granted
-        val bluetoothConnectPermission = Manifest.permission.BLUETOOTH_CONNECT
-        if (ContextCompat.checkSelfPermission(context, bluetoothConnectPermission) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(bluetoothConnectPermission),
-                123
-            )
-        }
-
-         */
-        val isEnabled = bluetoothAdapter?.isEnabled ?: false
-        Log.d("BluetoothManager", "Bluetooth Enabled: $isEnabled")
-        viewModel.updateBluetoothState(isEnabled)
-
-        if (!isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            activityResultLauncher.launch(enableBtIntent)
-        }
-
-        // Request Bluetooth connect permission if not granted
-        val bluetoothConnectPermission = Manifest.permission.BLUETOOTH_CONNECT
-        val bluetoothScanPermission = Manifest.permission.BLUETOOTH_SCAN
-        if (ContextCompat.checkSelfPermission(context, bluetoothConnectPermission) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, bluetoothScanPermission) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionLauncher.launch(arrayOf(bluetoothConnectPermission, bluetoothScanPermission))
-        }
-    }
-
-    fun discoverDevices(requestCode: Int) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-            // Request BLUETOOTH_SCAN permission (you'll need to handle this)
-            ActivityCompat.requestPermissions(
-                context as Activity,
-                arrayOf(Manifest.permission.BLUETOOTH_SCAN),
-                requestCode // Define this request code
-            )
-            return // Don't proceed with discovery if permission is not granted
-        }
-        Log.d("BluetoothManager", "Starting Bluetooth discovery")
-        discoveredDevice = null
-        if (bluetoothAdapter?.isDiscovering == true) {
-            bluetoothAdapter?.cancelDiscovery()
-        }
-        bluetoothAdapter?.startDiscovery()
-    }
-
-    fun pairWithDiscoveredDevice(requestCode: Int) {
-        if (discoveredDevice != null) {
-            Log.d("BluetoothManager", "Device was discovered!")
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-                // Request BLUETOOTH_ADMIN permission (you'll need to handle this)
-                ActivityCompat.requestPermissions(
-                    context as Activity,
-                    arrayOf(Manifest.permission.BLUETOOTH_ADMIN),
-                    requestCode // Define this request code (e.g., 1003)
-                )
-                return // Don't proceed with pairing if permission is not granted
-            }
-
-            pairDevice(discoveredDevice!!)
-            bluetoothAdapter?.cancelDiscovery() // Stop discovery after pairing
-
-            // Initiate the GATT connection
-            connectToDevice(discoveredDevice!!.name)
-        } else {
-            // Handle case where no device was found (e.g., show a message)
-            Log.d("BluetoothManager", "No device discovered")
-        }
-    }
 
     fun pairDevice(device: BluetoothDevice) {
         if (ActivityCompat.checkSelfPermission(
@@ -329,48 +431,14 @@ class BluetoothManager(
         Log.d("BluetoothManager", "Pairing Result: $isPairingSuccessful")
     }
 
-    fun sendSelection(selection: String) {
-        checkBluetoothState()
-        if (isBluetoothEnabled.value && gatt != null) {
-            val characteristic = gatt?.getService(ANDROID_SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_UUID)
-            characteristic?.let {
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    return
-                }
-                val bytes = selection.toByteArray(Charsets.UTF_8)
-                it.value = bytes
-            /*
-            bluetoothAdapter?.let { //bluetoothAdapter ->
-                connectedDevice?.let { //connectedDevice ->
-                    val bytes = selection.toByteArray(Charsets.UTF_8)
-                    val characteristic = gatt?.getService(ANDROID_SERVICE_UUID)?.getCharacteristic(CHARACTERISTIC_UUID)
-                    characteristic?.let {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.BLUETOOTH
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            return
-                        }
-                        */
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    gatt?.writeCharacteristic(it, bytes, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE)
-                } else {
-                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                    gatt?.writeCharacteristic(it)
-                }
-            }
-        }
-    }
-
     fun checkBluetoothState() {
         val isEnabled = bluetoothAdapter?.isEnabled ?: false
         isBluetoothEnabled.value = isEnabled
 
         val bluetoothAdminPermission = Manifest.permission.BLUETOOTH_CONNECT
         if (ContextCompat.checkSelfPermission(context, bluetoothAdminPermission)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             // Permission is not granted, request it from the user
             ActivityCompat.requestPermissions(
                 context as Activity,
@@ -390,10 +458,6 @@ class BluetoothManager(
         }
     }
 
-    // Constants for permissions
-    private val BLUETOOTH_PERMISSION = Manifest.permission.BLUETOOTH
-    private val BLUETOOTH_ADMIN_PERMISSION = Manifest.permission.BLUETOOTH_ADMIN
-
     // Function to check if permissions are granted
     fun arePermissionsGranted(): Boolean {
         val bluetoothPermissionGranted = ContextCompat.checkSelfPermission(
@@ -406,16 +470,26 @@ class BluetoothManager(
             BLUETOOTH_ADMIN_PERMISSION
         ) == PackageManager.PERMISSION_GRANTED
 
-        return bluetoothPermissionGranted && bluetoothAdminPermissionGranted
+        val bluetoothConnectPermissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            BLUETOOTH_CONNECT_PERMISSION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val bluetoothScanPermissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            BLUETOOTH_SCAN_PERMISSION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        return bluetoothPermissionGranted && bluetoothAdminPermissionGranted &&
+                bluetoothConnectPermissionGranted && bluetoothScanPermissionGranted
     }
 
     // Function to request permissions
-    fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            context as Activity,
-            arrayOf(BLUETOOTH_PERMISSION, BLUETOOTH_ADMIN_PERMISSION),
-            PERMISSION_REQUEST_CODE
-        )
+    fun requestPermissions(permissionLauncher: ActivityResultLauncher<Array<String>>) {
+        permissionLauncher.launch(arrayOf(
+            BLUETOOTH_PERMISSION, BLUETOOTH_ADMIN_PERMISSION,
+            BLUETOOTH_CONNECT_PERMISSION, BLUETOOTH_SCAN_PERMISSION
+        ))
     }
 
     // Function to handle permission results
@@ -437,7 +511,7 @@ class BluetoothManager(
     }
 
     //fun getBluetoothAdapter(): BluetoothAdapter? {
-      //  return bluetoothAdapter
+    //  return bluetoothAdapter
     //}
 
     fun getConnectedDevice(): BluetoothDevice? {
@@ -447,12 +521,14 @@ class BluetoothManager(
     fun getGatt(): BluetoothGatt? {
         return gatt
     }
+
     fun getServiceUUID(): UUID {
-        return ANDROID_SERVICE_UUID
+        return JUKEBOX_SERVICE_UUID
     }
 
     fun getCharacteristicUUID(): UUID {
-        return CHARACTERISTIC_UUID
+        return SONG_NUMBER_UUID
     }
+
 }
 

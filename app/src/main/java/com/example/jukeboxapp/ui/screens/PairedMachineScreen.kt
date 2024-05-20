@@ -37,7 +37,7 @@ fun PairedMachine(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
+    //val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -49,7 +49,7 @@ fun PairedMachine(
             viewModel,
             modifier = Modifier.padding(6.dp)
         )
-        //Spacer(modifier = Modifier.height(24.dp))
+
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -63,11 +63,7 @@ fun PairedMachine(
             )
         }
 
-        //Spacer(modifier = Modifier.height(24.dp))
-        Row(
-
-        ) {
-
+        Row() {
             OutlinedButton(onClick = {
                 navController.navigate("main_page_screen")
                 viewModel.updateBluetoothState(false)
@@ -81,12 +77,8 @@ fun PairedMachine(
             }) {
                 Text(stringResource(id = R.string.continue_button))
             }
-
-
         }
     }
-
-
 }
 
 @Preview(showBackground = true)
