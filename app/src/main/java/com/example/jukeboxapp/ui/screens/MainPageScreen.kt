@@ -178,7 +178,7 @@ fun MakeToast(text: String) {
     val context = LocalContext.current
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
-
+/*
 @Preview(showBackground = true)
 @Composable
 fun MainPagePreview() {
@@ -191,3 +191,5 @@ fun MainPagePreview() {
         MainPage(navController, viewModel, bluetoothManager)
     }
 }
+
+ */

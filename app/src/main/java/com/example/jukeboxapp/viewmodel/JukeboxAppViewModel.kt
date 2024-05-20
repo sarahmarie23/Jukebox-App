@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jukeboxapp.data.JukeboxDataStore
 import com.example.jukeboxapp.model.JukeboxState
+import com.example.jukeboxapp.ui.BluetoothCallback
 import com.example.jukeboxapp.ui.BluetoothManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,14 +14,18 @@ import kotlinx.coroutines.launch
 
 
 
-class JukeboxAppViewModel(initialState: JukeboxState, context: Context) : ViewModel() {
+class JukeboxAppViewModel(
+    initialState: JukeboxState,
+    private val dataStore: JukeboxDataStore,
+    private val bluetoothManager: BluetoothManager
+) : ViewModel(), BluetoothCallback {
     // Variable declarations
-    private val bluetoothManager = BluetoothManager(this, context)
-    private val dataStore = JukeboxDataStore(context)
+
     private val _jukeboxStateFlow: MutableStateFlow<JukeboxState> = MutableStateFlow(JukeboxState())
     val jukeboxStateFlow: StateFlow<JukeboxState> = _jukeboxStateFlow
 
     init {
+        bluetoothManager.setBluetoothCallback(this)
         observeJukeboxState()
     }
 
@@ -29,6 +34,18 @@ class JukeboxAppViewModel(initialState: JukeboxState, context: Context) : ViewMo
             dataStore.jukeboxStateFlow.collect { state ->
                 _jukeboxStateFlow.value = state
             }
+        }
+    }
+
+    override fun onBluetoothStateChange(isEnabled: Boolean) {
+        viewModelScope.launch {
+            dataStore.updateBluetoothState(isEnabled)
+        }
+    }
+
+    override fun onMachineTypeUpdate(machineType: String) {
+        viewModelScope.launch {
+            dataStore.updateMachineType(machineType)
         }
     }
 

@@ -96,7 +96,7 @@ private fun showToastError(context: Context) {
     Toast.makeText(context,"Enter a number", Toast.LENGTH_SHORT)
 }
 */
-
+/*
 @Preview(showBackground = true)
 @Composable
 fun RemoteScreenPreview() {
@@ -108,3 +108,5 @@ fun RemoteScreenPreview() {
         Remote(navController, testViewModel)
     }
 }
+
+ */

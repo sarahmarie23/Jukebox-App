@@ -80,7 +80,7 @@ fun PairedMachine(
         }
     }
 }
-
+/*
 @Preview(showBackground = true)
 @Composable
 fun MachinePairingPreview() {
@@ -92,3 +92,5 @@ fun MachinePairingPreview() {
         PairedMachine(navController, viewModel)
     }
 }
+
+ */

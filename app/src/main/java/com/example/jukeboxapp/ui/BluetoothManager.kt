@@ -34,10 +34,12 @@ import com.example.jukeboxapp.R.string.machine_type_uuid
 import com.example.jukeboxapp.R.string.song_number_uuid
 
 
-class BluetoothManager(
-    private val viewModel: JukeboxAppViewModel,
-    private val context: Context
-) {
+class BluetoothManager(private val context: Context) {
+    private var bluetoothCallback: BluetoothCallback? = null
+
+    fun setBluetoothCallback(callback: BluetoothCallback) {
+        this.bluetoothCallback = callback
+    }
     // Entry point for all bluetooth interaction
     // Used to discover devices, get a list of paired devices, instantiate a BluetoothDevice
     // using a known MAC address, and create a BluetoothServerSocket to listen for communications
@@ -293,7 +295,7 @@ class BluetoothManager(
                     return
                 }
                 val bytes = selection.toByteArray(Charsets.UTF_8)
-                it.value = bytes
+                it.setValue(bytes)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     gatt?.writeCharacteristic(
@@ -305,6 +307,7 @@ class BluetoothManager(
                     characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     gatt?.writeCharacteristic(it)
                 }
+                Log.d("BluetoothManager", "writeCharacteristic Result: ${gatt?.writeCharacteristic(it) != null}")
             }
         } else {
             Log.e("BluetoothManager", "Didn't send I think")
@@ -373,9 +376,22 @@ class BluetoothManager(
                 val data = characteristic.value
                 val machineType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"
                 Log.d("BluetoothManager", "Machine Type: $machineType")
-                viewModel.updateMachineType(machineType)
+                bluetoothCallback?.onMachineTypeUpdate(machineType)
             } else {
                 Log.e("BluetoothManager", "Failed to read characteristic. Status: $status")
+            }
+        }
+
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            super.onCharacteristicWrite(gatt, characteristic, status)
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.d("BluetoothManager", "Characteristic write successful")
+            } else {
+                Log.e("BluetoothManager", "Characteristic write failed with status: $status")
             }
         }
     }

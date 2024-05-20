@@ -187,6 +187,7 @@ fun MyMachinesCard(
             .padding(16.dp)
     )
 }
+/*
 
 @Preview
 @Composable
@@ -221,3 +222,5 @@ fun PairedCardPreview(
         PairedCard(navController, viewModel)
     }
 }
+
+ */
