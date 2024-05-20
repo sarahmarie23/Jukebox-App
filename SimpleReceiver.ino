@@ -4,9 +4,11 @@
 
 #define MACHINE_TYPE_UUID "FD2DE127-D3EA-4385-A2BC-CEE9EFB1531D" // For the jukebox type
 #define SONG_NUMBER_UUID "25CDD283-218B-44E2-927A-4EC194351E4F" // For the song number received
+#define JUKEBOX_SERVICE_UUID "4bcdc221-276e-4117-bd83-34bd4bc9d003" //
 
 ArduinoLEDMatrix matrix;
-BLECharacteristic machineTypeCharacteristic(MACHINE_TYPE_UUID, BLERead, 1); // For the jukebox type
+BLEService jukeboxService(JUKEBOX_SERVICE_UUID);
+BLECharacteristic machineTypeCharacteristic(MACHINE_TYPE_UUID, BLERead | BLENotify, 1); // For the jukebox type
 BLECharacteristic songNumberCharacteristic(SONG_NUMBER_UUID, BLEWrite, 1);
 
 const uint32_t happy[] = {
@@ -31,16 +33,12 @@ void setup() {
       while (1);
   }
 
-  BLECharacteristic placeholderCharacteristic(0x180A, BLERead, 20); // Device Information Service UUID
-  placeholderCharacteristic.setValue("Placeholder");
-
   BLE.setLocalName("Jukebox Receiver");
-  BLEService jukeboxService = BLEService();
 
-  machineTypeCharacteristic.setValue(0); // Default machine type  
+  //machineTypeCharacteristic.setValue(0); // Default machine type  
   jukeboxService.addCharacteristic(machineTypeCharacteristic); 
  
-  songNumberCharacteristic.setValue(0);
+  //songNumberCharacteristic.setValue(0);
   jukeboxService.addCharacteristic(songNumberCharacteristic);
 
   BLE.addService(jukeboxService);
@@ -62,7 +60,7 @@ void loop() {
     while (central.connected()) {
       if (songNumberCharacteristic.written()) {
         // Song number received as a byte
-        uint8_t receivedSong = machineTypeCharacteristic.value()[0];
+        uint8_t receivedSong = songNumberCharacteristic.value()[0];
         Serial.print("Received song number: ");
         Serial.println(receivedSong);
 
