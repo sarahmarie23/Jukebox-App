@@ -34,21 +34,16 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.Screen.RemoteScreen.route
-import com.example.jukeboxapp.model.JukeboxState
-import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
-import kotlinx.coroutines.flow.map
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,8 +71,12 @@ fun JukeboxNameCard(
     viewModel: JukeboxAppViewModel,
     modifier: Modifier = Modifier
 ) {
-    var nameInput by remember { mutableStateOf(viewModel.jukeboxStateFlow.value.machineName) }
-    val machineTypeText by viewModel.jukeboxStateFlow.map { it.machineType }.collectAsState(initial = "")
+    val jukeboxState by viewModel.jukeboxStateFlow.collectAsState()
+
+    var nameInput by remember { mutableStateOf(jukeboxState.machineName) }
+    val isConnectedToMachine = jukeboxState.isPairedToMachine
+    val machineType = if (isConnectedToMachine) jukeboxState.machineType else "N/A"
+
     Surface(
         modifier = Modifier.width(300.dp),
         shape = RoundedCornerShape(10.dp),
@@ -97,7 +96,7 @@ fun JukeboxNameCard(
             )
 
             Text(
-                text = machineTypeText,
+                text = machineType,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -120,9 +119,8 @@ fun PairedCard(
     navController: NavController,
     viewModel: JukeboxAppViewModel
 ) {
-    val jukeboxName by remember { mutableStateOf(viewModel.jukeboxStateFlow.value.machineName) }
-    val isConnectedToMachine by viewModel.jukeboxStateFlow.map { it.isConnectedToMachine }.collectAsState(initial = false)
-    val machineType by viewModel.jukeboxStateFlow.map { it.machineType }.collectAsState(initial = "N/A")
+    val jukeboxState by viewModel.jukeboxStateFlow.collectAsState()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,7 +139,7 @@ fun PairedCard(
                 horizontalAlignment = AbsoluteAlignment.Right
             ) {
                 Text(
-                    text = jukeboxName,
+                    text = jukeboxState.machineName,
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Right,
                     modifier = Modifier
@@ -156,7 +154,7 @@ fun PairedCard(
                 ) {
                     Icon(Icons.Rounded.CheckCircle, contentDescription = null)
                     Text(
-                        text = if (isConnectedToMachine) "Connected" else "Disconnected",
+                        text = if (jukeboxState.isPairedToMachine) "Connected" else "Disconnected",
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Right,
                         modifier = Modifier
@@ -165,7 +163,7 @@ fun PairedCard(
                     )
                 }
                 Text(
-                    text = machineType,
+                    text = if (jukeboxState.isPairedToMachine) jukeboxState.machineType else "N/A",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Right,
                     modifier = Modifier

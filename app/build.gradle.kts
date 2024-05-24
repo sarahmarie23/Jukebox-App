@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
     //implementation(libs.compose.preview.renderer)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     val nav_version = "2.7.7"
     implementation(libs.androidx.bluetooth)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

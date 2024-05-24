@@ -1,5 +1,6 @@
 package com.example.jukeboxapp.ui.screens
 
+import androidx.compose.runtime.State
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,10 +36,11 @@ import kotlinx.coroutines.flow.map
 fun PairedMachine(
     navController: NavController,
     viewModel: JukeboxAppViewModel,
+    state: State<JukeboxState>,
     modifier: Modifier = Modifier
 ) {
     //val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
-
+    val currentState = state.value
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround,

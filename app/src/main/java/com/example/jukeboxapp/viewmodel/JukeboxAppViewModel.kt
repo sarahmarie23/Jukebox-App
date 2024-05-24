@@ -1,6 +1,5 @@
 package com.example.jukeboxapp.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jukeboxapp.data.JukeboxDataStore
@@ -15,7 +14,6 @@ import kotlinx.coroutines.launch
 
 
 class JukeboxAppViewModel(
-    initialState: JukeboxState,
     private val dataStore: JukeboxDataStore,
     private val bluetoothManager: BluetoothManager
 ) : ViewModel(), BluetoothCallback {
@@ -31,21 +29,38 @@ class JukeboxAppViewModel(
 
     private fun observeJukeboxState() {
         viewModelScope.launch {
-            dataStore.jukeboxStateFlow.collect { state ->
-                _jukeboxStateFlow.value = state
+            try {
+                dataStore.jukeboxStateFlow.collect { state ->
+                    _jukeboxStateFlow.value = state
+                }
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
             }
         }
     }
 
     override fun onBluetoothStateChange(isEnabled: Boolean) {
         viewModelScope.launch {
-            dataStore.updateBluetoothState(isEnabled)
+            try {
+                dataStore.updateBluetoothState(isEnabled)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isBluetoothConnected = isEnabled)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
     override fun onMachineTypeUpdate(machineType: String) {
         viewModelScope.launch {
-            dataStore.updateMachineType(machineType)
+            try {
+                dataStore.updateMachineType(machineType)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
@@ -56,13 +71,23 @@ class JukeboxAppViewModel(
 
     fun updateBluetoothState(isEnabled: Boolean) {
         viewModelScope.launch {
-            dataStore.updateBluetoothState(isEnabled)
+            try {
+                dataStore.updateBluetoothState(isEnabled)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
     fun updateLastSongSelection(selection: String) {
         viewModelScope.launch {
-            dataStore.updateLastSongSelection(selection)
+            try {
+                dataStore.updateLastSongSelection(selection)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
@@ -70,13 +95,24 @@ class JukeboxAppViewModel(
         val newName = if (name.isBlank()) "My Jukebox" else name
 
         viewModelScope.launch {
-            dataStore.updateJukeboxName(newName)
+            try {
+                dataStore.updateJukeboxName(newName)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
     fun updateMachineType(machineType: String) {
         viewModelScope.launch {
-            dataStore.updateMachineType(machineType)
+            try {
+                dataStore.updateMachineType(machineType)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 
@@ -84,9 +120,15 @@ class JukeboxAppViewModel(
         bluetoothManager.sendSelection(selection)
     }
 
-    fun updateIsConnectedState(isConnected: Boolean) {
+    fun updateIsPairedState(isConnected: Boolean) {
         viewModelScope.launch {
-            dataStore.updateIsConnectedState(isConnected)
+            try {
+                dataStore.updateIsPairedState(isConnected)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isPairedToMachine = isConnected)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
         }
     }
 

@@ -16,6 +16,7 @@ datastoreCoreAndroid = "1.1.1"
 composePreviewRenderer = "0.0.1-alpha01"
 kotlinxSerializationJson = "1.6.0"
 navigationCompose = "2.7.7"
+lifecycleRuntimeComposeAndroid = "2.8.0"
 
 [libraries]
 androidx-bluetooth = { module = "androidx.bluetooth:bluetooth", version.ref = "bluetooth" }
@@ -43,6 +44,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 compose-preview-renderer = { group = "com.android.tools.compose", name = "compose-preview-renderer", version.ref = "composePreviewRenderer" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

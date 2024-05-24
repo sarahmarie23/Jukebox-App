@@ -3,6 +3,7 @@ package com.example.jukeboxapp.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -14,20 +15,20 @@ import kotlinx.coroutines.flow.map
 
 class JukeboxDataStore(context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "jukebox_settings")
-    private val dataStore: DataStore<Preferences> by lazy { context.dataStore }
+    private val dataStore = context.dataStore
 
     companion object {
-        val IS_BLUETOOTH_ENABLED_KEY = stringPreferencesKey("is_bluetooth_enabled")
+        val IS_BLUETOOTH_CONNECTED_KEY = booleanPreferencesKey("is_bluetooth_enabled")
         val LAST_SONG_SELECTION_KEY = stringPreferencesKey("last_song_selection")
         val JUKEBOX_NAME_KEY = stringPreferencesKey("jukebox_name")
-        val IS_CD_MACHINE_KEY = stringPreferencesKey("is_cd_machine")
-        val IS_CONNECTED_TO_MACHINE_KEY = stringPreferencesKey("is_connected_to_machine")
+        val MACHINE_TYPE_KEY = stringPreferencesKey("machine_type")
+        val IS_PAIRED_TO_MACHINE_KEY = booleanPreferencesKey("is_connected_to_machine")
     }
 
     // Functions to update individual state values
     suspend fun updateBluetoothState(isEnabled: Boolean) {
         dataStore.edit { preferences ->
-            preferences[IS_BLUETOOTH_ENABLED_KEY] = isEnabled.toString()
+            preferences[IS_BLUETOOTH_CONNECTED_KEY] = isEnabled
         }
     }
 
@@ -45,51 +46,77 @@ class JukeboxDataStore(context: Context) {
 
     suspend fun updateMachineType(machineType: String) {
         dataStore.edit { preferences ->
-            preferences[IS_CD_MACHINE_KEY] = machineType
+            preferences[MACHINE_TYPE_KEY] = machineType
         }
     }
-    suspend fun updateIsConnectedState(isConnected: Boolean) {
+    suspend fun updateIsPairedState(isConnected: Boolean) {
         dataStore.edit { preferences ->
-            preferences[IS_CONNECTED_TO_MACHINE_KEY] = isConnected.toString()
+            preferences[IS_PAIRED_TO_MACHINE_KEY] = isConnected
         }
     }
 
     // Generic function to update all state values
     private suspend fun updateState(state: JukeboxState) {
         dataStore.edit { preferences ->
-            preferences[IS_BLUETOOTH_ENABLED_KEY] = state.isBluetoothConnected.toString()
+            preferences[IS_BLUETOOTH_CONNECTED_KEY] = state.isBluetoothConnected
             preferences[LAST_SONG_SELECTION_KEY] = state.lastSongSelection
             preferences[JUKEBOX_NAME_KEY] = state.machineName
-            preferences[IS_CD_MACHINE_KEY] = state.machineType
-            preferences[IS_CONNECTED_TO_MACHINE_KEY] = state.isConnectedToMachine.toString()
+            preferences[MACHINE_TYPE_KEY] = state.machineType
+            preferences[IS_PAIRED_TO_MACHINE_KEY] = state.isPairedToMachine
         }
     }
     suspend fun updateJukeboxState(newState: JukeboxState) {
         updateState(newState)
     }
 
+    private fun <T> withDefault(preferences: Preferences, key: Preferences.Key<T>, defaultValue: T): T{
+        return try {
+            preferences[key]?: defaultValue;
+        } catch (e: ClassCastException) {
+            defaultValue;
+        }
+    }
     // Flow to observe state changes
     val jukeboxStateFlow: Flow<JukeboxState> = dataStore.data.map { preferences ->
-        val isBluetoothEnabled = preferences[IS_BLUETOOTH_ENABLED_KEY]?.toBoolean() ?: false
-        val lastSongSelection = preferences[LAST_SONG_SELECTION_KEY] ?: ""
-        val machineName = preferences[JUKEBOX_NAME_KEY] ?: ""
-        val machineType = preferences[IS_CD_MACHINE_KEY]?: ""
+        val isBluetoothEnabled = withDefault(preferences, IS_BLUETOOTH_CONNECTED_KEY, false)
+        val lastSongSelection = withDefault(preferences, LAST_SONG_SELECTION_KEY, "")
+        val machineName = withDefault(preferences, JUKEBOX_NAME_KEY, "")
+        val machineType = withDefault(preferences, MACHINE_TYPE_KEY, "")
         JukeboxState(isBluetoothEnabled, lastSongSelection, machineName, machineType)
     }.distinctUntilChanged()
 
     // Function to read state
     suspend fun readJukeboxState(): JukeboxState {
+        return jukeboxStateFlow.first()
+    }
+/*
+    // Flow to observe state changes
+    val jukeboxStateFlow: Flow<JukeboxState> = dataStore.data.map { preferences ->
+        JukeboxState(
+            isBluetoothConnected = preferences[IS_BLUETOOTH_CONNECTED_KEY] ?: false,
+            lastSongSelection = preferences[LAST_SONG_SELECTION_KEY] ?: "",
+            machineName = preferences[JUKEBOX_NAME_KEY] ?: "My Jukebox",
+            machineType = preferences[MACHINE_TYPE_KEY] ?: "N/A",
+            isPairedToMachine = preferences[IS_PAIRED_TO_MACHINE_KEY] ?: false
+        )
+    }.distinctUntilChanged()
+
+    // Function to read state
+    suspend fun readJukeboxState(): JukeboxState {
         return dataStore.data.map { preferences ->
-            val isBluetoothEnabled = preferences[IS_BLUETOOTH_ENABLED_KEY]?.toBoolean() ?: false
-            val lastSongSelection = preferences[LAST_SONG_SELECTION_KEY] ?: ""
-            val machineName = preferences[JUKEBOX_NAME_KEY] ?: ""
-            val machineType = preferences[IS_CD_MACHINE_KEY]?: ""
-            JukeboxState(isBluetoothEnabled, lastSongSelection, machineName, machineType)
+            JukeboxState(
+                isBluetoothConnected = preferences[IS_BLUETOOTH_CONNECTED_KEY]?: false,
+                lastSongSelection = preferences[LAST_SONG_SELECTION_KEY] ?: "",
+                machineName = preferences[JUKEBOX_NAME_KEY] ?: "My Jukebox",
+                machineType = preferences[MACHINE_TYPE_KEY] ?: "N/A",
+                isPairedToMachine = preferences[IS_PAIRED_TO_MACHINE_KEY] ?: false
+            )
         }.first()
     }
 
     // Probably won't need but keeping it just in case
     suspend fun updateBluetoothStateFlow(isEnabled: Boolean) {
-        updateState(jukeboxStateFlow.first().copy(isConnectedToMachine = isEnabled))
+        updateState(jukeboxStateFlow.first().copy(isPairedToMachine = isEnabled))
     }
+     */
 }

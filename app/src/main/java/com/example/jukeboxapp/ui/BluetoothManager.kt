@@ -374,7 +374,13 @@ class BluetoothManager(private val context: Context) {
         ) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 val data = characteristic.value
-                val machineType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"
+                Log.e("BluetoothManager", "DATA is: $data.value,  ${data[0]}")
+                //val machineType = if (data[0] == 1.toByte()) "CD Version" else "Vinyl Version"
+                val machineType = when (data[0]) {
+                    1.toByte() -> "CD Version"
+                    0.toByte() -> "Vinyl Version"
+                    else -> "Unknown"
+                }
                 Log.d("BluetoothManager", "Machine Type: $machineType")
                 bluetoothCallback?.onMachineTypeUpdate(machineType)
             } else {
@@ -425,12 +431,6 @@ class BluetoothManager(private val context: Context) {
         //handleConnectionStateChange(isConnected)
     }
 
-        /*
-    fun handleConnectionStateChange(isConnected: Boolean) {
-        viewModel.updateConnectionStatus(isConnected)
-    }
-
- */
 
     fun pairDevice(device: BluetoothDevice) {
         if (ActivityCompat.checkSelfPermission(

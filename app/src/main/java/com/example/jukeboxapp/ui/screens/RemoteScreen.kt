@@ -1,6 +1,7 @@
 package com.example.jukeboxapp.ui.screens
 
 import android.widget.Toast
+import androidx.compose.runtime.State
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.map
 fun Remote(
     navController: NavController,
     viewModel: JukeboxAppViewModel,
+    state: State<JukeboxState>,
     modifier: Modifier = Modifier
 ) {
     val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)

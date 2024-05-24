@@ -1,6 +1,7 @@
 package com.example.jukeboxapp.ui.screens
 
 import android.Manifest
+import androidx.compose.runtime.State
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -10,7 +11,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,19 +28,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.jukeboxapp.R
 import com.example.jukeboxapp.model.JukeboxState
 import com.example.jukeboxapp.ui.BluetoothManager
 import com.example.jukeboxapp.ui.components.MyMachinesCard
 import com.example.jukeboxapp.ui.components.PairedCard
 import com.example.jukeboxapp.ui.components.TopAppBar
-import com.example.jukeboxapp.ui.theme.JukeboxAppTheme
 import com.example.jukeboxapp.viewmodel.JukeboxAppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
@@ -56,10 +52,12 @@ fun MainPage(
     navController: NavController,
     viewModel: JukeboxAppViewModel,
     bluetoothManager: BluetoothManager,
+    state: State<JukeboxState>,
     modifier: Modifier = Modifier
 ) {
     val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
-    val isConnectedToMachine by viewModel.jukeboxStateFlow.map { it.isConnectedToMachine }.collectAsState(initial = false)
+    val currentState = state.value
+    val isConnectedToMachine by viewModel.jukeboxStateFlow.map { it.isPairedToMachine }.collectAsState(initial = false)
     var delayNeeded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var deviceName by remember { mutableStateOf("") }

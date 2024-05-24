@@ -1,8 +1,6 @@
 package com.example.jukeboxapp.model
 
-import androidx.compose.ui.res.stringResource
 import androidx.datastore.core.Serializer
-import com.example.jukeboxapp.R
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationStrategy
@@ -18,7 +16,7 @@ data class JukeboxState(
     val lastSongSelection: String = "00",
     val machineName: String = "My Jukebox",
     val machineType: String = "N/A",
-    val isConnectedToMachine: Boolean = false
+    val isPairedToMachine: Boolean = false
 )
 
 object JukeboxStateSerializer : Serializer<JukeboxState> {
