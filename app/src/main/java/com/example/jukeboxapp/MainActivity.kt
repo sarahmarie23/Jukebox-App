@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -47,8 +48,10 @@ class MainActivity : ComponentActivity() {
                     val state = JukeboxState(false, "00", "My Jukebox", "N/A", false)
                     val bluetoothManager = BluetoothManager(context)
 
-                    val factory = JukeboxAppViewModelFactory(JukeboxDataStore(context), bluetoothManager)
-                    viewModel = viewModel(factory = factory)
+                    //val factory = JukeboxAppViewModelFactory(JukeboxDataStore(context), bluetoothManager)
+                    //viewModel = viewModel(factory = factory)
+                    val factory = JukeboxAppViewModelFactory(context, bluetoothManager)
+                    viewModel = ViewModelProvider(this, factory).get(JukeboxAppViewModel::class.java)
                     Navigation(navController, viewModel, bluetoothManager)
                 }
             }

@@ -75,7 +75,8 @@ fun JukeboxNameCard(
 
     var nameInput by remember { mutableStateOf(jukeboxState.machineName) }
     val isConnectedToMachine = jukeboxState.isPairedToMachine
-    val machineType = if (isConnectedToMachine) jukeboxState.machineType else "N/A"
+    //val machineType = if (isConnectedToMachine) jukeboxState.machineType else "N/A" TODO isConnectedToMachine updates
+    val machineType =  jukeboxState.machineType
 
     Surface(
         modifier = Modifier.width(300.dp),
@@ -107,7 +108,9 @@ fun JukeboxNameCard(
             Spacer(modifier = Modifier.height(12.dp))
             TextField(
                 value = nameInput,
-                onValueChange = { nameInput = it },
+                onValueChange = { newInput ->
+                    nameInput = newInput
+                    viewModel.updateJukeboxName(newInput) },
                 label = { Text(stringResource(id = R.string.jukebox_name)) },
             )
         }
@@ -163,7 +166,7 @@ fun PairedCard(
                     )
                 }
                 Text(
-                    text = if (jukeboxState.isPairedToMachine) jukeboxState.machineType else "N/A",
+                    text = jukeboxState.machineType,
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Right,
                     modifier = Modifier

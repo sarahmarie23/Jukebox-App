@@ -402,7 +402,6 @@ class BluetoothManager(private val context: Context) {
         }
     }
 
-
     fun onDestroy() {
         // Unregister the receivers to prevent memory leaks
         context.unregisterReceiver(receiver)

@@ -42,10 +42,9 @@ fun Remote(
         modifier = modifier.fillMaxSize()
     ) {
         //if (!isBluetoothConnected) {
-            // display error message
+            //  Text("Bluetooth is not connected", color = Color.Red)
         //} else {
             RemoteNumberInput(
-                viewModel = viewModel,
                 value = lastSongSelection,
                 onValueChange = { newSelection -> viewModel.updateLastSongSelection(newSelection) },
                 onNumberSent = {
@@ -61,7 +60,6 @@ fun Remote(
 
 @Composable
 fun RemoteNumberInput(
-    viewModel: JukeboxAppViewModel,
     value: String,
     onValueChange: (String) -> Unit,
     onNumberSent: () -> Unit
@@ -78,7 +76,6 @@ fun RemoteNumberInput(
         keyboardActions = KeyboardActions(
             onDone = {
                 onNumberSent()
-                viewModel.sendSelectionToReceiver(value)
             }
         ),
         modifier = Modifier.fillMaxWidth()

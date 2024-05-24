@@ -56,7 +56,7 @@ class JukeboxAppViewModel(
         viewModelScope.launch {
             try {
                 dataStore.updateMachineType(machineType)
-                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+                //_jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
             } catch (e: Exception) {
                 // Handle the exception
                 e.printStackTrace()
