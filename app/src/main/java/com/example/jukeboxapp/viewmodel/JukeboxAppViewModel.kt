@@ -8,6 +8,8 @@ import com.example.jukeboxapp.ui.BluetoothCallback
 import com.example.jukeboxapp.ui.BluetoothManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -19,8 +21,8 @@ class JukeboxAppViewModel(
 ) : ViewModel(), BluetoothCallback {
     // Variable declarations
 
-    private val _jukeboxStateFlow: MutableStateFlow<JukeboxState> = MutableStateFlow(JukeboxState())
-    val jukeboxStateFlow: StateFlow<JukeboxState> = _jukeboxStateFlow
+    private val _jukeboxStateFlow = MutableStateFlow(JukeboxState())
+    val jukeboxStateFlow: StateFlow<JukeboxState> = _jukeboxStateFlow.asStateFlow()
 
     init {
         bluetoothManager.setBluetoothCallback(this)
@@ -97,6 +99,9 @@ class JukeboxAppViewModel(
         viewModelScope.launch {
             try {
                 dataStore.updateJukeboxName(newName)
+                _jukeboxStateFlow.update { currentState ->
+                    currentState.copy(machineName = newName)
+                }
             } catch (e: Exception) {
                 // Handle the exception
                 e.printStackTrace()

@@ -12,11 +12,12 @@ import java.io.OutputStream
 
 @Serializable
 data class JukeboxState(
-    val isBluetoothConnected: Boolean = false,
+    val isBluetoothConnected: Boolean = false, // Determines if you can move on to the PairedScreen and Remote Screen
     val lastSongSelection: String = "00",
     val machineName: String = "My Jukebox",
     val machineType: String = "N/A",
-    val isPairedToMachine: Boolean = false
+    val isPairedToMachine: Boolean = false // If its paired, the machine info will show up on the main page, regardless
+                                          // if you are connected to the bluetooth or not
 )
 
 object JukeboxStateSerializer : Serializer<JukeboxState> {

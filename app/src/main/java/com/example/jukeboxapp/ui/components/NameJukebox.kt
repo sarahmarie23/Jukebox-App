@@ -72,11 +72,7 @@ fun JukeboxNameCard(
     modifier: Modifier = Modifier
 ) {
     val jukeboxState by viewModel.jukeboxStateFlow.collectAsState()
-
     var nameInput by remember { mutableStateOf(jukeboxState.machineName) }
-    val isConnectedToMachine = jukeboxState.isPairedToMachine
-    //val machineType = if (isConnectedToMachine) jukeboxState.machineType else "N/A" TODO isConnectedToMachine updates
-    val machineType =  jukeboxState.machineType
 
     Surface(
         modifier = Modifier.width(300.dp),
@@ -97,7 +93,7 @@ fun JukeboxNameCard(
             )
 
             Text(
-                text = machineType,
+                text = jukeboxState.machineType.ifEmpty { "N/A" },
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -117,6 +113,7 @@ fun JukeboxNameCard(
     }
 }
 
+// This is on the MainPage, shows the name if a jukebox has been added
 @Composable
 fun PairedCard(
     navController: NavController,
