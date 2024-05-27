@@ -10,13 +10,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -33,8 +40,10 @@ fun Remote(
     state: State<JukeboxState>,
     modifier: Modifier = Modifier
 ) {
-    val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
-    val lastSongSelection by viewModel.jukeboxStateFlow.map { it.lastSongSelection }.collectAsState(initial = "00")
+    val jukeboxState by viewModel.jukeboxStateFlow.collectAsState()
+    //val isBluetoothConnected by viewModel.jukeboxStateFlow.map { it.isBluetoothConnected }.collectAsState(initial = false)
+    var lastSongSelection by rememberSaveable { mutableStateOf(jukeboxState.lastSongSelection.ifEmpty { "00" }) }
+    var inputCompleted by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
 
     Column(
@@ -44,43 +53,35 @@ fun Remote(
         //if (!isBluetoothConnected) {
             //  Text("Bluetooth is not connected", color = Color.Red)
         //} else {
-            RemoteNumberInput(
-                value = lastSongSelection,
-                onValueChange = { newSelection -> viewModel.updateLastSongSelection(newSelection) },
-                onNumberSent = {
-                    viewModel.sendSelectionToReceiver(lastSongSelection)
-                    Toast.makeText(context, "Selection $lastSongSelection sent", Toast.LENGTH_SHORT).show()
-                }
+            TextField(
+                value = if (inputCompleted && lastSongSelection.isEmpty()) "00" else lastSongSelection,
+                onValueChange = { newSelection ->
+                    lastSongSelection = newSelection
+                    inputCompleted = false
+                    viewModel.updateLastSongSelection(newSelection)
+                },
+                label = { Text("Enter a number")},
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        inputCompleted = true
+                        if (lastSongSelection.isEmpty()) {
+                            lastSongSelection = "00"
+                            viewModel.updateLastSongSelection("00")
+                        }
+                        viewModel.sendSelectionToReceiver(lastSongSelection)
+                        Toast.makeText(context, "Selection $lastSongSelection sent", Toast.LENGTH_SHORT).show()
+                    }
+                ),
+                modifier = Modifier.fillMaxWidth()
             )
             }
         //}
 }
 
-
-
-@Composable
-fun RemoteNumberInput(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onNumberSent: () -> Unit
-) {
-
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text("Enter a number")},
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onNumberSent()
-            }
-        ),
-        modifier = Modifier.fillMaxWidth()
-    )
-}
 // toast to show that the user must enter a number only
 /*
 fun onValueChange(newValue: String) {
