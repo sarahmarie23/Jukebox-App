@@ -1,82 +1,175 @@
 package com.example.jukeboxapp.viewmodel
 
-import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.jukeboxapp.data.JukeboxDataStore
-import com.example.jukeboxapp.model.JukeboxAppState
+import com.example.jukeboxapp.model.JukeboxState
+import com.example.jukeboxapp.ui.BluetoothCallback
 import com.example.jukeboxapp.ui.BluetoothManager
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
 
-class JukeboxAppViewModel(initialState: JukeboxAppState, context: Context) : ViewModel() {
-    private val bluetoothManager = BluetoothManager(this, context)
-    private val dataStore: DataStore<Preferences> by context.preferencesDataStore(name = "jukebox_preferences")
-    private val jukeboxDataStore = JukeboxDataStore(dataStore)
 
-    val isBluetoothEnabled = mutableStateOf(initialState.isBluetoothEnabled)
-    var connectionStatus: MutableState<String> = mutableStateOf("Disconnected")
-    val jukeboxName = mutableStateOf("My Jukebox")
-    private val _jukeboxType = MutableLiveData<String>()
-    val jukeboxType: LiveData<String>
-        get() = _jukeboxType
+class JukeboxAppViewModel(
+    private val dataStore: JukeboxDataStore,
+    private val bluetoothManager: BluetoothManager
+) : ViewModel(),
+    BluetoothManager.BluetoothConnectionCallback,
+    BluetoothManager.BluetoothStateCallback,
+    BluetoothManager.BluetoothCallback {
+    // Variable declarations
 
-    val lastSongSelection: MutableState<String> = mutableStateOf( initialState.lastSongSelection)
+    private val _jukeboxStateFlow = MutableStateFlow(JukeboxState())
+    val jukeboxStateFlow: StateFlow<JukeboxState> = _jukeboxStateFlow.asStateFlow()
+
+    private val _connectionStatus = MutableStateFlow("Disconnected")
+    val connectionStatus: StateFlow<String> = _connectionStatus.asStateFlow()
 
     init {
+        bluetoothManager.setBluetoothConnectionCallback(this)
+        bluetoothManager.setBluetoothStateCallback(this)
+        bluetoothManager.setBluetoothCallback(this)
+        observeJukeboxState()
+    }
+
+    private fun observeJukeboxState() {
         viewModelScope.launch {
-            dataStore.storedJukeboxName.collect { savedName : String? ->
-                jukeboxName.value = savedName?: "My Jukebox" // Load saved name on ViewModel initialization
+            try {
+                dataStore.jukeboxStateFlow.collect { state ->
+                    _jukeboxStateFlow.value = state
+                }
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
             }
         }
     }
 
-    val jukeboxUiState = combine(
-        jukeboxDataStore.storedJukeboxName
-    ) { storedJukeboxName ->
-        JukeboxUiState(
-            jukeboxName = storedJukeboxName ?: "My Jukebox"
-        )
-    }.distinctUntilChanged()
-
-    fun updateBluetoothState(isEnabled: Boolean) {
-        isBluetoothEnabled.value = isEnabled
-    }
-
-    fun updateConnectionStatus(isConnected: Boolean) {
-        connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
-    }
-
-    fun updateJukeboxName(newName: String) {
-        viewModelScope.launch { // Use viewModelScope for asynchronous operations
-            jukeboxDataStore.saveJukeboxName(newName) // Save the name to DataStore
-            jukeboxName.value = newName // Update the UI state
+    override fun onConnectionStatusChanged(isConnected: Boolean) {
+        _connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
+        viewModelScope.launch {
+            try {
+                dataStore.updateIsPairedState(isConnected)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isPairedToMachine = isConnected)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    fun updateJukeboxType(type: String) {
-        _jukeboxType.value = type
+    override fun onBluetoothStateChange(isEnabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                dataStore.updateBluetoothState(isEnabled)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isBluetoothConnected = isEnabled)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
+        if (isEnabled) {
+            // Start discovery or any other operation related to Bluetooth being enabled
+        }
+    }
+
+    override fun onMachineTypeUpdate(machineType: String) {
+        viewModelScope.launch {
+            try {
+                dataStore.updateMachineType(machineType)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Update functions
+    private suspend fun updateState(newState: JukeboxState) {
+        dataStore.updateJukeboxState(newState)
+    }
+
+    fun updateBluetoothState(isEnabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                dataStore.updateBluetoothState(isEnabled)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
     }
 
     fun updateLastSongSelection(selection: String) {
-        lastSongSelection.value = selection
-        sendSelectionToReceiver(selection)
+        viewModelScope.launch {
+            try {
+                dataStore.updateLastSongSelection(selection)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun updateJukeboxName(name: String) {
+        val newName = if (name.isBlank()) "My Jukebox" else name
+
+        viewModelScope.launch {
+            try {
+                dataStore.updateJukeboxName(newName)
+                _jukeboxStateFlow.update { currentState ->
+                    currentState.copy(machineName = newName)
+                }
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun updateMachineType(machineType: String) {
+        viewModelScope.launch {
+            try {
+                dataStore.updateMachineType(machineType)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
     }
 
     fun sendSelectionToReceiver(selection: String) {
         bluetoothManager.sendSelection(selection)
     }
+
+    fun updateIsPairedState(isConnected: Boolean) {
+        viewModelScope.launch {
+            try {
+                dataStore.updateIsPairedState(isConnected)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isPairedToMachine = isConnected)
+            } catch (e: Exception) {
+                // Handle the exception
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /*
+    Example of what you'd put in the Screen
+
+        // Collect the jukebox state using a StateFlow or collectAsState
+        val jukeboxState by viewModel.jukeboxState.collectAsState()
+
+        // Update the jukebox state when needed
+        LaunchedEffect(key1 = Unit) {
+            val newState = JukeboxState(/* new state values */)
+            viewModel.updateJukeboxState(newState)
+        }
+     */
 }
-data class JukeboxUiState(
-    val jukeboxName: String = "My Jukebox"
-)
