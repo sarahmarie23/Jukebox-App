@@ -18,13 +18,21 @@ import kotlinx.coroutines.launch
 class JukeboxAppViewModel(
     private val dataStore: JukeboxDataStore,
     private val bluetoothManager: BluetoothManager
-) : ViewModel(), BluetoothCallback {
+) : ViewModel(),
+    BluetoothManager.BluetoothConnectionCallback,
+    BluetoothManager.BluetoothStateCallback,
+    BluetoothManager.BluetoothCallback {
     // Variable declarations
 
     private val _jukeboxStateFlow = MutableStateFlow(JukeboxState())
     val jukeboxStateFlow: StateFlow<JukeboxState> = _jukeboxStateFlow.asStateFlow()
 
+    private val _connectionStatus = MutableStateFlow("Disconnected")
+    val connectionStatus: StateFlow<String> = _connectionStatus.asStateFlow()
+
     init {
+        bluetoothManager.setBluetoothConnectionCallback(this)
+        bluetoothManager.setBluetoothStateCallback(this)
         bluetoothManager.setBluetoothCallback(this)
         observeJukeboxState()
     }
@@ -42,6 +50,18 @@ class JukeboxAppViewModel(
         }
     }
 
+    override fun onConnectionStatusChanged(isConnected: Boolean) {
+        _connectionStatus.value = if (isConnected) "Connected" else "Disconnected"
+        viewModelScope.launch {
+            try {
+                dataStore.updateIsPairedState(isConnected)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(isPairedToMachine = isConnected)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     override fun onBluetoothStateChange(isEnabled: Boolean) {
         viewModelScope.launch {
             try {
@@ -52,13 +72,16 @@ class JukeboxAppViewModel(
                 e.printStackTrace()
             }
         }
+        if (isEnabled) {
+            // Start discovery or any other operation related to Bluetooth being enabled
+        }
     }
 
     override fun onMachineTypeUpdate(machineType: String) {
         viewModelScope.launch {
             try {
                 dataStore.updateMachineType(machineType)
-                //_jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
+                _jukeboxStateFlow.value = _jukeboxStateFlow.value.copy(machineType = machineType)
             } catch (e: Exception) {
                 // Handle the exception
                 e.printStackTrace()
