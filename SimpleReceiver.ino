@@ -12,6 +12,7 @@ BLEService jukeboxService(JUKEBOX_SERVICE_UUID);
 BLECharacteristic machineTypeCharacteristic(MACHINE_TYPE_UUID, BLERead | BLENotify, 1); // For the jukebox type
 BLECharacteristic songNumberCharacteristic(SONG_NUMBER_UUID, BLERead | BLEWrite | BLENotify, 20);
 
+// For testing
 const uint32_t happy[] = {
     0x19819,
     0x80000001,
@@ -24,6 +25,7 @@ const uint32_t heart[] = {
 };
 
 bool deviceConnected = false;
+String receivedValue ="";
 
 void characteristicWritten(BLEDevice central, BLECharacteristic characteristic) {
   if (characteristic == songNumberCharacteristic) {
@@ -34,7 +36,7 @@ void characteristicWritten(BLEDevice central, BLECharacteristic characteristic) 
       Serial.print("Received song number: ");
 
       // Convert byte array to string
-      String receivedValue = "";
+      receivedValue = "";
       for (int i = 0; i < len; i++) {
         Serial.print(buffer[i], HEX); // Print hex values for debugging
         receivedValue += (char)buffer[i];
@@ -43,30 +45,6 @@ void characteristicWritten(BLEDevice central, BLECharacteristic characteristic) 
 
       Serial.print("Received song number (as string): ");
       Serial.println(receivedValue);
-      /*
-      matrix.print(receivedValue);
-        // Make it scroll!
-      matrix.beginDraw();
-
-      matrix.stroke(0xFFFFFFFF);
-      matrix.textScrollSpeed(50);
-
-      // add the text
-      const char text[] = "    Hello World!    ";
-      matrix.textFont(Font_5x7);
-      matrix.beginText(0, 1, 0xFFFFFF);
-      matrix.println(text);
-      matrix.endText(SCROLL_LEFT);
-
-      matrix.endDraw();
-      */
-      // TODO: Encode numbers to LED light
-      if (receivedValue == "1") {
-        matrix.loadFrame(happy);
-      } else {
-        matrix.loadFrame(heart);
-      }
-      delay(500);
     }
   }
 }
@@ -109,8 +87,28 @@ void loop() {
     Serial.print("Sent machine type ");
     Serial.println(machineType);
     machineTypeCharacteristic.writeValue(&machineType, sizeof(machineType));
+
     while (central.connected()) {
-        delay(500);
+      if (!receivedValue.isEmpty()) {
+        matrix.clear();
+        matrix.beginDraw();
+        matrix.stroke(0xFFFFFFFF); // Set the stroke color to white
+        matrix.textScrollSpeed(30); // Set the text scroll speed
+        matrix.textFont(Font_5x7); // Set the font
+        
+        // Begin drawing text
+        matrix.beginText(0, 1, 0xFFFFFF); // Set text starting position and color
+        matrix.println("Received song:"); // Print the prefix text
+        matrix.println(receivedValue); // Print the received song number
+        matrix.endText(SCROLL_LEFT); // End text and set scroll direction
+        
+        matrix.endDraw(); // End drawing on the matrix
+
+        delay(50); // Delay to allow for the text to be displayed
+
+        receivedValue = ""; // Clear the received value after displaying it
+      }
+      delay(10);
     }
     Serial.print("Disconnected from central: ");
     Serial.println(central.address());
