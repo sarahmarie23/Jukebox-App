@@ -69,7 +69,7 @@ This is my initial concept drawings for how the app might look like.
 ### Technical Architecture
 
 * The ability to make a Bluetooth connection.
-* * Storing information about the jukebox: type (vinyl or CD), name, model (for now we only have one model supported), connection status, last played song
+* Storing information about the jukebox: type (vinyl or CD), name, model (for now we only have one model supported), connection status, last played song
 * *A mapping of the jukebox buttons to the song titles. For CDs, this will be a 2 digit CD and 2 digit track number. Vinyls will just use a 2 digit value.* A number keypad to make song selections. Future version will validate for CD and vinyl selections.
 * ~~Discogs API for gathering song metadata~~
 
@@ -99,7 +99,35 @@ The value of the app is that you can control your jukebox from the comfort of at
 
 ### User privacy and security
 
-Like most apps, this one does not have a username and password login, so there's no need to store sensitive user data. The information that is stored is stored directly in the phone, 
+Like most apps, this one does not have a username and password login, so there's no need to store sensitive user data. The information that is stored is stored directly in the phone, using Preferences DataStore. This is the recommended API to use, over Shared Preferences. Overall, I tried to use the Android recommended APIs whenever possible. In order to prevent just any user to connect to the receiver, only those using the app will be able to do so. This is because the app will only connect to the exact IP address of the Arduino. Also, the Arduino and app have matching UUIDs, which are needed for communication. These are all stored in the Strings XML file, so in the future I'd like an even more secure way of storing this information. I'd probably incorporate a paring system, similar to when you pair with your TV over Bluetooth.
+
+### Proper app/lifecycle state management
+
+This was hard to get working. Perhaps it wasn't necessary but I insisted on MVVM architecture, since I was looking into it last quarter and it seems like the recommended way to go. State was easy to manage on the simple practice app but when I had to add in checks to make sure the Bluetooth was connected and update that state, is where it started getting complicated and buggy. I used Data Store and Flow to update it, a State data class, and ViewModel to get everything synchronized. I found using the Jetpack libraries to be well-documented and used tutorials from the official Android documentation to learn how it all worked.
+
+### Challenges unique to mobile app development
+
+**Bluetooth sending and receiving** - This was the biggest challenge, as I've mentioned a few times. It's a several step process. The Arduino peripheral would show up as an available device, but wouldn't actually pair. Its one thing to connect, and another to pair, and yet another to pair again after its been paired the first time. Each of these steps were such a hassle to get working. And finally, then you can receive a message. Maybe. I struggled to find out if it was the Arduino that wasn't sending or if the phone wasn't receiving. The same struggle was even more challenging for the reverse communication. 
+
+**Permission handling** - Initially I put what I thought were the bare minimum permissions, as I read the documentation. There were some that I thought I didn't need (like those related to location) so I didn't put them in. Later I figured out all the permissions that were needed. Next time I can add several and then after the app works, try removing until I'm left with those that are actually needed.
+
+**Working with IoT (Arduio)** - Incorporating the Arduino was a challenge because at times I wasn't sure if the code was messing up on the Arduino or Android side (more likely both). I had not dabbled in microcontrollers before. I used what I had on hand, and it worked for the purposes of the project, which was cool to see.
+
+### Good user experience
+
+My app follows the golden path. It is simple and easy to use. Its not fancy by any means, but I don't think my target audience would want anything too complicated. I'll make improvements to the UI/UX after the app works with the real receiver in a real jukebox.
+
+## Where I'm going from here
+
+I have a few goals this summer to continue this project and move forward to a fully working product. 
+
+**1. Research microcontrollers and accessories** - I used an Arduino that I had, but perhaps there is another device or component that is better suited for this project.
+
+**2. Work on the receiver** - I'll do some studying on electronics and work with those who are experienced in microcontrollers and jukebox mechanics.
+
+**3. Get the app working with the real receiver** - I would like to get the MVP receiver working, and then have the app connect to it, and play the songs on the jukebpx.
+
+**4. App improvements** - When the above is completed, I can move onto the next version of the app. This includes improving the app's UX for CD/vinyl versions, integrating phone listening and pausing abilities. 
 
 # Mockup for the app
 
