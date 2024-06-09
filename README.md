@@ -1,7 +1,8 @@
 # Jukebox Player App
 
 Sarah Martel  
-Version 1
+Version 1 
+
 6/8/24
 
 ## Summary of Project
@@ -89,6 +90,16 @@ This is my initial concept drawings for how the app might look like.
 ## Reflection on the initial app version (as what was submitted 6/5/24)
 
 ### Accomplishing the stated objective 
+
+My ultimate goal is to have an app that will be able to communicate with a receiver that is plugged inside a jukebox. The app will control the music being played from the jukebox. Since I don't have an actual jukebox or experience (yet) in electronics/hardware, my objective for this initial version was to have the app work with an Arduino. I stayed with my happy/golden path, which was to insist on the necessary permissions, walk the user to connecting to the receiver, receive data about the machine type, and send the song number. Also the state should be maintained. Which I did.
+
+### Delivering on the value proposition
+
+The value of the app is that you can control your jukebox from the comfort of at a distance from the jukebox. It does the minimum controls and at a distance because it uses Bluetooth.
+
+### User privacy and security
+
+Like most apps, this one does not have a username and password login, so there's no need to store sensitive user data. The information that is stored is stored directly in the phone, 
 
 # Mockup for the app
 
