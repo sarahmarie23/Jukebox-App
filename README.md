@@ -2,16 +2,17 @@
 
 Sarah Martel  
 Version 1
+6/8/24
 
 ## Summary of Project
 
-This app serves as a companion app to the [TBD] jukebox receiver device. If a customer buys the device, they will be able to plug it into their jukebox and control their jukebox from the Jukebox Player app. They can create a playlist and play all the songs in their jukebox and use their phone like a remote to play, stop, skip, repeat, and resume playing the music from their vinyls or CDs.
+This app serves as a companion app to the jukebox receiver device, which I will contribute to start its design and production in the coming months. Owners of the device will be able to plug it into their jukebox and control their jukebox from the Jukebox Player app. They can play all the songs in their jukebox and use their phone like a remote to queue up the music from their vinyls or CDs. Much like the classic way of making selections on the machine while standing at the jukebox, this can now be done from sitting at a distance, easily on your phone. 
 
 ## Project Analysis
 
 ### Value Proposition
 
-Jukebox owners have expressed interest in such a way to control their jukebox from their phone. While you can purchase a jukebox that you can control with an app, collectors would like to be able to play their own unique collectible machines. Customers would like to be able to control the music being played without having to stand right in front of the jukebox. They have most notably requested the ability to be able to take a call on their phone, and the jukebox stops playing music, without them having to go to it and stop it manually, or walk into another room to hear the call. Our app will be able to do that, along with allowing the user to create their own playlists from the music in their machine, and controlling the music remotely from their phone.
+Jukebox owners have expressed interest in such a way to control their jukebox from their phone. While you can purchase a jukebox that you can control with an app, collectors would like to be able to play their own unique collectible machines. Customers would like to be able to control the music being played without having to stand right in front of the jukebox. They have most notably requested the ability to be able to take a call on their phone, and the jukebox stops playing music, without them having to go to it and stop it manually, or walk into another room to hear the call. Version 1.0 of our app provides users the ability to make song selections, while the next release will enable phone call listening and music control features. Users can now be the ultimate at-home Jukebox DJ, all remotely from their phone.
 
 ### Primary Purpose
 
@@ -19,7 +20,7 @@ The purpose is to enhance the experience of owning a collectible jukebox and bri
 
 ### Target Audience
 
-Vintage jukebox collectors, predominantly men aged 60+ in the US and Europe. The company producing the receiver will be starting out by making it compatible with the Wurlitzer One More Time 1015 model (vinyl and CD versions) since that is the most popular model of vintage jukebox. After the MVP stage, receivers that are compatible with other models will be created. The app will be compatible with users of multiple devices. The receiver will be sold primarily on eBay, and also on Facebook Marketplace, with instructions to download the free app from the App/Play Store.
+Vintage jukebox collectors, predominantly men aged 60+ in the US and Europe. The family-owned business producing the receiver will start out by making it compatible with the Wurlitzer One More Time 1015 model (vinyl and CD versions) since that is the most popular vintage jukebox model. After the MVP stage, receivers that are compatible with other models will be created. The app will be compatible with users of multiple devices. The receiver will be sold primarily on eBay, and also on Facebook Marketplace, with instructions to download the free app from the App/Play Store.
 
 <div style="text-align:center">
 
@@ -53,10 +54,12 @@ The app will be free, because it will only work with our receiver, which could s
 
 ### UI/UX Design
 
-The first step for the app will be helping the user to connect to their jukebox via bluetooth. It will verify that the app has bluetooth and other necessary permissions. There will be prompts to connect and turn on the receiver and jukebox if it is not detected by the phone. Once a connection is established, it will ask the user to verify the type of jukebox (vinyl or CD). There will be simple, large buttons to play a song, stop, pause (CD only). If the user taps the play button, the number keypad will pop up asking for the disc number and the song/side number. The number system is slightly different for vinyl or CD but for all versions, a number signal is being sent out corresponding to the disc.
-If the user receives a call, the jukebox will stop playing. When the user hangs up the call, the music will start playing again.
+The first step for the app will be helping the user to connect to their jukebox via bluetooth. The app first asks the user to allow the permissions necessary to run the app, and will not continue unless the user agrees. The Bluetooth pairing dialog box will pop up when the user selects the receiver from the visible devices list. It prompts the user to connect and turn on the receiver and jukebox if it is not detected by the phone. Once a connection is established, it will ask the user to verify the type of jukebox (vinyl or CD). There will be simple, large buttons to play a song, stop, pause (CD only). If the user taps the play button, the number keypad will pop up asking for the disc number and the song/side number. The number system is slightly different for vinyl or CD but for all versions, a number signal is being sent out corresponding to the disc.
+In a future version, if the user receives a call, the jukebox will stop playing. When the user hangs up the call, the music will start playing again.
 
 ### Wireframe Drawings
+
+This is my initial concept drawings for how the app might look like.
 
 ![Wireframe 1](https://raw.githubusercontent.com/sarahmarie23/Jukebox-App/master/wireframe1.jpg)
 
@@ -65,23 +68,27 @@ If the user receives a call, the jukebox will stop playing. When the user hangs 
 ### Technical Architecture
 
 * The ability to make a Bluetooth connection.
-* A mapping of the jukebox buttons to the song titles. For CDs, this will be a 2 digit CD and 2 digit track number. Vinyls will just use a 2 digit value.
-* Discogs API for gathering song metadata
-* Storing information about the jukebox: type (vinyl or CD), name, model (for now we only have one model supported), connection status, last played song
+* * Storing information about the jukebox: type (vinyl or CD), name, model (for now we only have one model supported), connection status, last played song
+* *A mapping of the jukebox buttons to the song titles. For CDs, this will be a 2 digit CD and 2 digit track number. Vinyls will just use a 2 digit value.* A number keypad to make song selections. Future version will validate for CD and vinyl selections.
+* ~~Discogs API for gathering song metadata~~
 
 ## Challenges and Open Questions
 
-**Getting Bluetooth working** - It seems a bit complicated and might take some time trying to get it to work. Ideally I’d get it to connect to an Arduino, since the actual final product would have one inside it. As an MVP demonstration, I could have it transmit Bluetooth data to my computer, and the data could be printed out in a terminal.
+**Getting Bluetooth working** - It seems a bit complicated and might take some time trying to get it to work. Ideally I’d get it to connect to an Arduino, since the actual final product would have one inside it. As an MVP demonstration, I could have it transmit Bluetooth data to my computer, and the data could be printed out in a terminal. It was a huge struggle to get Bluetooth working. It still has some complications, but I have proven that the app can transmit to and receive data from a microcontroller. More testing will be done on alternative components and microcontrollers to find the most appropriate device for the actual receiver. 
 
-**Testing** - I won’t have a real jukebox or an actual receiver device to test the app with. As a solution, I will be simulating the app’s functionality by sending bluetooth signals to an Arduino that will then light in a certain sequence or display something on a screen. The finished app and device will work by transmitting a number that corresponds to the disc/song and the receiver will translate that number signal into the correct disc.
+**Testing** - I won’t have a real jukebox or an actual receiver device to test the app with. As a solution, I will be simulating the app’s functionality by sending Bluetooth signals to an Arduino that will then light in a certain sequence or display something on a screen. The finished app and device will work by transmitting a number that corresponds to the disc/song and the receiver will translate that number signal into the correct disc. 
 
-**Getting data** - I need to do more research on how the song information will be put into the app. There’s the Spotify API, which has access to metadata, but it has a cost after 500 requests per month. And it wouldn’t have information about records. There is the Discogs database, which includes information on vinyl records and has an API to use. I could use a website like [https://45cat.com](https://45cat.com) and get the data straight from the website.
+**Getting data** - This is something that will be two versions from now: *I need to do more research on how the song information will be put into the app. There’s the Spotify API, which has access to metadata, but it has a cost after 500 requests per month. And it wouldn’t have information about records. There is the Discogs database, which includes information on vinyl records and has an API to use. I could use a website like [https://45cat.com](https://45cat.com) and get the data straight from the website.*
 
 **Using an API** - I’ve never used an API, will I be able to learn in time? Could be a knowledge limitation. To overcome this, I will start working on this early and do my best to not procrastinate.
 
 **Question 1:** How would users prefer to make song selections? I was told to make it like a remote with number buttons. Would customers prefer that (the MVP version) or would they want something more visual like scrolling through a playlist in a music player app (Spotify)?
 
 **Question 2:** How will the users create a playlist? The brute force method would be manually typing in each song name into a list mapped to the button number that corresponds to it in the jukebox. Ideally, they would search for the song name and then some data would be downloaded to create the playlist (album cover, artist, date). I need to get some opinions from others on what they would prefer.
+
+## Reflection on the initial app version (as what was submitted 6/5/24)
+
+### Accomplishing the stated objective 
 
 # Mockup for the app
 
